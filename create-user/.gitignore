@@ -1,0 +1,9 @@
+# Ignore everything
+*
+
+# But not these folders
+!backend/
+!create-user/
+
+# And not the .gitignore file itself
+!.gitignore
