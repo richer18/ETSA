@@ -1,0 +1,17 @@
+# Node modules
+/my-app/node_modules
+
+# Build files
+/my-app/build
+/my-app/.next
+.DS_Store
+
+# Environment
+.env
+.env.local
+
+# Composer & PHP
+/vendor
+
+# JSON logs (optional)
+backend/user_login/*.json
