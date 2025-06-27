@@ -53,7 +53,11 @@ use App\Http\Controllers\GeneralFundDataGetGFCommentsController;
 use App\Http\Controllers\GeneralFundDataCommentGFCountsController;
 use App\Http\Controllers\GeneralFundDataGenerateReportController;
 use App\Http\Controllers\GeneralFundDataGeneralFundDataReportController;
-
+use App\Http\Controllers\GeneralFundTotalTaxReportController;
+use App\Http\Controllers\GeneralFundDataTaxOnBusinessReportController;
+use App\Http\Controllers\GeneralFundDataServiceUserChargesController;
+use App\Http\Controllers\GeneralFundDataRegulatoryFeesController;
+use App\Http\Controllers\GeneralFundDataReceiptsFromEconomicEnterpriseController;
 
 
 
@@ -152,3 +156,8 @@ Route::get('/commentGFCounts', [GeneralFundDataCommentGFCountsController::class,
 Route::post('/generate-report', [GeneralFundDataGenerateReportController::class, 'generate']);
 Route::get('/generalFundDataReport', [GeneralFundDataGeneralFundDataReportController::class, 'index']);
 Route::get('/getRPTComments/{date}', [RealPropertyTaxDataGetRPTCommentsController::class, 'show']);
+Route::get('/general-fund-total-tax-report', [GeneralFundTotalTaxReportController::class, 'index']);
+Route::get('/general-fund-tax-on-business-report', [GeneralFundDataTaxOnBusinessReportController::class, 'index']);
+Route::get('/general-fund-service-user-charges', [GeneralFundDataServiceUserChargesController::class, 'index']);
+Route::get('/general-fund-regulatory-fees-report', [GeneralFundDataRegulatoryFeesController::class, 'index']);
+Route::get('/general-fund-receipts-from-economic-enterprise-report', [GeneralFundDataReceiptsFromEconomicEnterpriseController::class, 'index']);
