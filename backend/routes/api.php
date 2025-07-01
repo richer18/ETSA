@@ -59,7 +59,19 @@ use App\Http\Controllers\GeneralFundDataServiceUserChargesController;
 use App\Http\Controllers\GeneralFundDataRegulatoryFeesController;
 use App\Http\Controllers\GeneralFundDataReceiptsFromEconomicEnterpriseController;
 
-
+use App\Http\Controllers\TrustFundDataAllDataController;
+use App\Http\Controllers\TrustFundDataTotalAllDataController;
+use App\Http\Controllers\TrustFundDataBuildingPermitFeeTotalController;
+use App\Http\Controllers\TrustFundDataElectricalFeeTotalController;
+use App\Http\Controllers\TrustFundDataZoningFeeTotalController;
+use App\Http\Controllers\TrustFundDataLivestockDevFundTotalController;
+use App\Http\Controllers\TrustFundDataDivingFeeTotalController;
+use App\Http\Controllers\TrustFundDataAllDataTrustFundController;
+use App\Http\Controllers\TrustFundDataViewAllDataTrustFundTableViewController;
+use App\Http\Controllers\TrustFundDataGetTFCommentsController;
+use App\Http\Controllers\TrustFundDataCommentTFCountsController;
+use App\Http\Controllers\TrustFundDataUpdateTFCommentController;
+use App\Http\Controllers\TrustFundDataInsertTFCommentController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -161,3 +173,18 @@ Route::get('/general-fund-tax-on-business-report', [GeneralFundDataTaxOnBusiness
 Route::get('/general-fund-service-user-charges', [GeneralFundDataServiceUserChargesController::class, 'index']);
 Route::get('/general-fund-regulatory-fees-report', [GeneralFundDataRegulatoryFeesController::class, 'index']);
 Route::get('/general-fund-receipts-from-economic-enterprise-report', [GeneralFundDataReceiptsFromEconomicEnterpriseController::class, 'index']);
+
+Route::get('/table-trust-fund-all', [TrustFundDataAllDataController::class, 'index']);
+Route::get('/trust-fund-total', [TrustFundDataTotalAllDataController::class, 'index']);
+Route::get('/BuildingPermitFeeTotal', [TrustFundDataBuildingPermitFeeTotalController::class, 'index']);
+Route::get('/ElectricalFeeTotal', [TrustFundDataElectricalFeeTotalController::class, 'index']);
+Route::get('/ZoningFeeTotal', [TrustFundDataZoningFeeTotalController::class, 'index']);
+Route::get('/LivestockDevFundTotal', [TrustFundDataLivestockDevFundTotalController::class, 'index']);
+Route::get('/DivingFeeTotal', [TrustFundDataDivingFeeTotalController::class, 'index']);
+
+Route::get('/allDataTrustFund', [TrustFundDataAllDataTrustFundController::class, 'index']);
+Route::get('/viewalldataTrustFundTableView', [TrustFundDataViewAllDataTrustFundTableViewController::class, 'index']);
+Route::get('/getTFComments/{date}', [TrustFundDataGetTFCommentsController::class, 'show']);
+Route::get('/commentTFCounts', [TrustFundDataCommentTFCountsController::class, 'index']);
+Route::post('/updateTFComment', TrustFundDataUpdateTFCommentController::class);
+Route::post('/insertTFComment', TrustFundDataInsertTFCommentController::class);
