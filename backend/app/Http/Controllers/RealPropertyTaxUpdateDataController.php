@@ -43,7 +43,6 @@ class RealPropertyTaxUpdateDataController extends Controller
                     'gf_total' => $data['gf_total'],
                     'status' => $data['status'],
                     'cashier' => $data['cashier'],
-                    'comments' => $data['comments'],
                 ]);
 
             if ($affected === 0) {

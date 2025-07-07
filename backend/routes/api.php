@@ -72,6 +72,15 @@ use App\Http\Controllers\TrustFundDataGetTFCommentsController;
 use App\Http\Controllers\TrustFundDataCommentTFCountsController;
 use App\Http\Controllers\TrustFundDataUpdateTFCommentController;
 use App\Http\Controllers\TrustFundDataInsertTFCommentController;
+use App\Http\Controllers\TrustFundDataBuildingPermitFeesController;
+use App\Http\Controllers\TrustFundDataTotalFeesReportsController;
+use App\Http\Controllers\TrustFundDataElectricalPermitFeesController;
+use App\Http\Controllers\TrustFundDataZoningPermitFeesController;
+use App\Http\Controllers\TrustFundDataLivestockDevFundFeesController;
+use App\Http\Controllers\TrustFundDataDivingFeesController;
+use App\Http\Controllers\TrustFundDataSaveDataController;
+use App\Http\Controllers\TrustFundDataUpdateDataController;
+use App\Http\Controllers\TrustFundDataReportDataController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -188,3 +197,12 @@ Route::get('/getTFComments/{date}', [TrustFundDataGetTFCommentsController::class
 Route::get('/commentTFCounts', [TrustFundDataCommentTFCountsController::class, 'index']);
 Route::post('/updateTFComment', TrustFundDataUpdateTFCommentController::class);
 Route::post('/insertTFComment', TrustFundDataInsertTFCommentController::class);
+Route::get('/trust-fund-building-permit-fees', [TrustFundDataBuildingPermitFeesController::class, 'index']);
+Route::get('/trust-fund-total-fees-reports', TrustFundDataTotalFeesReportsController::class);
+Route::get('/trust-fund-electrical-permit-fees', TrustFundDataElectricalPermitFeesController::class);
+Route::get('/trust-fund-zoning-permit-fees', TrustFundDataZoningPermitFeesController::class);
+Route::get('/trust-fund-livestock-dev-fund-fees', TrustFundDataLivestockDevFundFeesController::class);
+Route::get('/trust-fund-diving-fees', TrustFundDataDivingFeesController::class);
+Route::post('/save-trust-fund', [TrustFundDataSaveDataController::class, 'store']);
+Route::put('/update-trust-fund/{id}', [TrustFundDataUpdateDataController::class, 'update']);
+Route::get('/trustFundDataReport', [TrustFundDataReportDataController::class, 'index']);
