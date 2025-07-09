@@ -82,6 +82,15 @@ use App\Http\Controllers\TrustFundDataSaveDataController;
 use App\Http\Controllers\TrustFundDataUpdateDataController;
 use App\Http\Controllers\TrustFundDataReportDataController;
 
+use App\Http\Controllers\CommunityTaxCertificateCedulaDataController;
+use App\Http\Controllers\CommunityTaxCertificateCedulaDailyCollectionController;
+use App\Http\Controllers\CommunityTaxCertificateViewDailyCollectionDetailsCedulaController;
+use App\Http\Controllers\CommunityTaxCertificateGetCedulaCommentsController;
+use App\Http\Controllers\CommunityTaxCertificateCommentCedulaCountsController;
+use App\Http\Controllers\CommunityTaxCertificateSummaryCollectionDataReportController;
+use App\Http\Controllers\CommunityTaxCertificateSaveCedulaDataController;
+use App\Http\Controllers\CommunityTaxCertificateUpdateCedulaDataController;
+
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
@@ -206,3 +215,12 @@ Route::get('/trust-fund-diving-fees', TrustFundDataDivingFeesController::class);
 Route::post('/save-trust-fund', [TrustFundDataSaveDataController::class, 'store']);
 Route::put('/update-trust-fund/{id}', [TrustFundDataUpdateDataController::class, 'update']);
 Route::get('/trustFundDataReport', [TrustFundDataReportDataController::class, 'index']);
+
+Route::get('/cedula', [CommunityTaxCertificateCedulaDataController::class, 'index']);
+Route::get('/CedulaDailyCollection', [CommunityTaxCertificateCedulaDailyCollectionController::class, 'index']);
+Route::get('/viewDailyCollectionDetailsCedula', [CommunityTaxCertificateViewDailyCollectionDetailsCedulaController::class, 'index']);
+Route::get('/getCedulaComments/{date}', [CommunityTaxCertificateGetCedulaCommentsController::class, 'show']);
+Route::get('/commentCedulaCounts', [CommunityTaxCertificateCommentCedulaCountsController::class, 'index']);
+Route::get('/cedulaSummaryCollectionDataReport', [CommunityTaxCertificateSummaryCollectionDataReportController::class, 'index']);
+Route::post('/saveCedulaData', [CommunityTaxCertificateSaveCedulaDataController::class, 'store']);
+Route::put('/updateCedulaData/{ctcno}', [CommunityTaxCertificateUpdateCedulaDataController::class, 'update']);
