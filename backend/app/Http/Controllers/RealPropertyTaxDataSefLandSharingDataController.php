@@ -10,22 +10,27 @@ class RealPropertyTaxDataSefLandSharingDataController extends Controller
 {
     public function index(Request $request)
     {
-        $year  = (int) $request->query('year');
-        $month = (int) $request->query('month');
-        $day   = (int) $request->query('day');
-
         try {
-            // Build date filter
+            // 📥 Get filters
+            $year = (int) $request->query('year');
+            $months = array_filter(array_map('intval', explode(',', $request->query('month', ''))));
+            $month = isset($months[0]) ? $months[0] : null;
+            $day = (int) $request->query('day');
+
+            // 🧱 Build dynamic WHERE conditions
             $dateFilter = "";
+
             if ($year && $month && $day) {
                 $date = sprintf('%04d-%02d-%02d', $year, $month, $day);
                 $dateFilter = "AND DATE(`date`) = '{$date}'";
-            } elseif ($year && $month) {
-                $dateFilter = "AND YEAR(`date`) = {$year} AND MONTH(`date`) = {$month}";
+            } elseif ($year && !empty($months)) {
+                $monthList = implode(',', $months);
+                $dateFilter = "AND YEAR(`date`) = {$year} AND MONTH(`date`) IN ({$monthList})";
             } elseif ($year) {
                 $dateFilter = "AND YEAR(`date`) = {$year}";
             }
 
+            // 🧠 Query with Common Table Expression
             $sql = "
                 WITH LandData AS (
                     SELECT 'Current' AS category,
@@ -70,11 +75,11 @@ class RealPropertyTaxDataSefLandSharingDataController extends Controller
             ";
 
             $results = DB::select($sql);
-
+            Log::info("✅ SEF Land Sharing Data fetched successfully");
             return response()->json($results);
 
         } catch (\Exception $e) {
-            Log::error('Error fetching SEF land sharing data: ' . $e->getMessage());
+            Log::error('❌ Error fetching SEF land sharing data: ' . $e->getMessage());
             return response()->json(['error' => 'Error fetching SEF land sharing data'], 500);
         }
     }

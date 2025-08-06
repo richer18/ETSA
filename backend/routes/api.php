@@ -91,6 +91,8 @@ use App\Http\Controllers\CommunityTaxCertificateSummaryCollectionDataReportContr
 use App\Http\Controllers\CommunityTaxCertificateSaveCedulaDataController;
 use App\Http\Controllers\CommunityTaxCertificateUpdateCedulaDataController;
 
+use App\Http\Controllers\TotalTaxCollectedDataController;
+
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
@@ -224,3 +226,5 @@ Route::get('/commentCedulaCounts', [CommunityTaxCertificateCommentCedulaCountsCo
 Route::get('/cedulaSummaryCollectionDataReport', [CommunityTaxCertificateSummaryCollectionDataReportController::class, 'index']);
 Route::post('/saveCedulaData', [CommunityTaxCertificateSaveCedulaDataController::class, 'store']);
 Route::put('/updateCedulaData/{ctcno}', [CommunityTaxCertificateUpdateCedulaDataController::class, 'update']);
+
+Route::get('/tax/monthly', [TotalTaxCollectedDataController::class, 'monthlyData']);

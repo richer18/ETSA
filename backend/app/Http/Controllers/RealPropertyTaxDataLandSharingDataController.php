@@ -13,18 +13,25 @@ class RealPropertyTaxDataLandSharingDataController extends Controller
         try {
             // ⏳ Get filters
             $year = (int) $request->query('year');
-            $month = (int) $request->query('month');
+
+            $months = array_filter(array_map('intval', explode(',', $request->query('month', ''))));
+            $month = isset($months[0]) ? $months[0] : null; // For day-level filter only
             $day = (int) $request->query('day');
 
             // 🧱 Build base query
             $query = DB::table('real_property_tax_data')
                 ->where('status', 'LIKE', 'LAND%');
 
+            // 📅 Filter by specific date
             if ($year && $month && $day) {
                 $query->whereDate('date', sprintf('%04d-%02d-%02d', $year, $month, $day));
-            } elseif ($year && $month) {
-                $query->whereYear('date', $year)->whereMonth('date', $month);
-            } elseif ($year) {
+            }
+            // 📅 Filter by year + month(s)
+            elseif ($year && !empty($months)) {
+                $query->whereYear('date', $year)->whereIn(DB::raw('MONTH(date)'), $months);
+            }
+            // 📅 Filter by year only
+            elseif ($year) {
                 $query->whereYear('date', $year);
             }
 
