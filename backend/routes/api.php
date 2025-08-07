@@ -92,6 +92,12 @@ use App\Http\Controllers\CommunityTaxCertificateSaveCedulaDataController;
 use App\Http\Controllers\CommunityTaxCertificateUpdateCedulaDataController;
 
 use App\Http\Controllers\TotalTaxCollectedDataController;
+use App\Http\Controllers\TaxOnBusinessBreakdownDataController;
+use App\Http\Controllers\ServiceUserChargesBreakdownDataController;
+use App\Http\Controllers\RegulatoryFeesAndChargesBreakdownDataController;
+use App\Http\Controllers\ReceiptsFromEconomicEntBreakdownDataController;
+
+
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -228,3 +234,7 @@ Route::post('/saveCedulaData', [CommunityTaxCertificateSaveCedulaDataController:
 Route::put('/updateCedulaData/{ctcno}', [CommunityTaxCertificateUpdateCedulaDataController::class, 'update']);
 
 Route::get('/tax/monthly', [TotalTaxCollectedDataController::class, 'monthlyData']);
+Route::get('/TaxOnBusinessBreakdown', [TaxOnBusinessBreakdownDataController::class, 'index']);
+Route::get('/ServiceUserChargesBreakdown', [ServiceUserChargesBreakdownDataController::class, 'index']);
+Route::get('/RegulatoryFeesAndChargesBreakdown', [RegulatoryFeesAndChargesBreakdownDataController::class, 'index']);
+Route::get('/ReceiptsFromEconomicEntBreakdown', [ReceiptsFromEconomicEntBreakdownDataController::class, 'index']);
