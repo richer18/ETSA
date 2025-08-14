@@ -42,6 +42,7 @@ class RealPropertyTaxUpdateDataController extends Controller
                     'additional_total' => $data['additional_total'],
                     'gf_total' => $data['gf_total'],
                     'status' => $data['status'],
+                    'advanced_payment' => $data['advanced_payment'],
                     'cashier' => $data['cashier'],
                 ]);
 
