@@ -15,7 +15,7 @@ class CommunityTaxCertificateUpdateCedulaDataController extends Controller
 
         $validated = $request->validate([
             'DATEISSUED' => $requiredDate,
-            'TRANSDATE' => $requiredDate,
+            'TRANSDATE' => 'nullable|date', // frontend may send or leave empty
             'CTCNO' => $string255,
             'CTCTYPE' => 'nullable|string|max:50',
             'OWNERNAME' => $string255,
@@ -25,11 +25,19 @@ class CommunityTaxCertificateUpdateCedulaDataController extends Controller
             'TOTALAMOUNTPAID' => 'required|numeric',
             'USERID' => $string255,
             'CTCYEAR' => 'required|integer',
-            'DATALASTEDITED' => $requiredDate,
         ]);
+
+        // If TRANSDATE is not sent, set it to current datetime
+        if (empty($validated['TRANSDATE'])) {
+            $validated['TRANSDATE'] = now();
+        }
+
+        // Always set last edited timestamp
+        $validated['DATALASTEDITED'] = now();
 
         $newCtcno = $validated['CTCNO'];
 
+        // Prevent duplicate CTCNO when updating
         if ($newCtcno !== $oldCtcno) {
             $duplicate = DB::table('cedula')->where('CTCNO', $newCtcno)->exists();
             if ($duplicate) {
