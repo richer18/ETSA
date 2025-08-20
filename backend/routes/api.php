@@ -97,7 +97,11 @@ use App\Http\Controllers\ServiceUserChargesBreakdownDataController;
 use App\Http\Controllers\RegulatoryFeesAndChargesBreakdownDataController;
 use App\Http\Controllers\ReceiptsFromEconomicEntBreakdownDataController;
 
+use App\Http\Controllers\FetchReportDataController;
+use App\Http\Controllers\UpdateReportDataController;
+use App\Http\Controllers\SaveAdjustmentDataController;
 
+use App\Http\Controllers\PsicCodeDataController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -238,3 +242,9 @@ Route::get('/TaxOnBusinessBreakdown', [TaxOnBusinessBreakdownDataController::cla
 Route::get('/ServiceUserChargesBreakdown', [ServiceUserChargesBreakdownDataController::class, 'index']);
 Route::get('/RegulatoryFeesAndChargesBreakdown', [RegulatoryFeesAndChargesBreakdownDataController::class, 'index']);
 Route::get('/ReceiptsFromEconomicEntBreakdown', [ReceiptsFromEconomicEntBreakdownDataController::class, 'index']);
+
+Route::get('/fetch-report', [FetchReportDataController::class, 'fetchReport']);
+Route::post('/update-report', [UpdateReportDataController::class, 'updateReport']);
+Route::post('/save-adjustment', [SaveAdjustmentDataController::class, 'saveAdjustment']);
+
+Route::get('/datapsic', [PsicCodeDataController::class, 'getDataPsic']);

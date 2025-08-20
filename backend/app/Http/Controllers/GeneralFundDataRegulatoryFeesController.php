@@ -5,89 +5,186 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Helpers\QueryHelpers;
 
-class GeneralFundDataRegulatoryFeesController extends Controller
+class RegulatoryFeesController extends Controller
 {
     public function index(Request $request)
     {
         try {
-            // Start with query builder for date filtering
-            $query = DB::table('general_fund_data');
-            $query = QueryHelpers::addDateFilters($query, $request, 'date');
+            $year = $request->input('year');
+            $months = $request->input('months'); // example: "1,2,3"
 
-            // Extract raw SQL and bindings to reuse in each subquery
-            $baseSql = $query->toSql();
-            $bindings = $query->getBindings();
+            if (!$year || !$months) {
+                return response()->json(['error' => 'Year and months are required'], 400);
+            }
 
-            $unionQuery = "
-                SELECT 'Mayors Permit' AS Taxes, SUM(Mayors_Permit) AS Total FROM ({$baseSql}) AS t
+            // Convert months string to array
+            $monthsArray = explode(',', $months);
+            $monthsList = implode(',', array_map('intval', $monthsArray)); // safe for SQL
+
+            $sql = "
+                SELECT category, SUM(total) AS total_amount
+                FROM (
+                    -- WEIGHS AND MEASURE
+                    SELECT 'WEIGHS AND MEASURE' AS category,
+                           COALESCE(SUM(Weighs_Measure), 0) AS total
+                    FROM general_fund_data
+                    WHERE YEAR(`date`) = {$year} AND MONTH(`date`) IN ({$monthsList})
+
+                    UNION ALL
+
+                    -- TRICYCLE PERMIT FEE
+                    SELECT 'TRICYCLE PERMIT FEE',
+                           COALESCE(SUM(Tricycle_Operators), 0)
+                    FROM general_fund_data
+                    WHERE YEAR(`date`) = {$year} AND MONTH(`date`) IN ({$monthsList})
+
+                    UNION ALL
+
+                    -- OCCUPATION TAX
+                    SELECT 'OCCUPATION TAX',
+                           COALESCE(SUM(Occupation_Tax), 0)
+                    FROM general_fund_data
+                    WHERE YEAR(`date`) = {$year} AND MONTH(`date`) IN ({$monthsList})
+
+                    UNION ALL
+
+                    -- OTHER PERMIST AND LICENSE (general fund)
+                    SELECT 'OTHER PERMIST AND LICENSE',
+                           (
+                               COALESCE(SUM(Docking_Mooring_Fee), 0) +
+                               COALESCE(SUM(Cockpit_Prov_Share), 0) +
+                               COALESCE(SUM(Cockpit_Local_Share), 0) +
+                               COALESCE(SUM(Sultadas), 0) +
+                               COALESCE(SUM(Miscellaneous_Fee), 0) +
+                               COALESCE(SUM(Fishing_Permit_Fee), 0) +
+                               COALESCE(SUM(Sale_of_Agri_Prod), 0) +
+                               COALESCE(SUM(Sale_of_Acct_Form), 0)
+                           )
+                    FROM general_fund_data
+                    WHERE YEAR(`date`) = {$year} AND MONTH(`date`) IN ({$monthsList})
+
+                    UNION ALL
+
+                    -- OTHER PERMIST AND LICENSE (trust fund)
+                    SELECT 'OTHER PERMIST AND LICENSE',
+                           (
+                               COALESCE(SUM(LIVESTOCK_DEV_FUND), 0) +
+                               COALESCE(SUM(DIVING_FEE), 0)
+                           )
+                    FROM trust_fund_data
+                    WHERE YEAR(`DATE`) = {$year} AND MONTH(`DATE`) IN ({$monthsList})
+
+                    UNION ALL
+
+                    -- CIVIL REGISTRATION
+                    SELECT 'CIVIL REGISTRATION',
+                           (
+                               COALESCE(SUM(Reg_of_Birth), 0) +
+                               COALESCE(SUM(Marriage_Fees), 0) +
+                               COALESCE(SUM(Burial_Fees), 0) +
+                               COALESCE(SUM(Correction_of_Entry), 0)
+                           )
+                    FROM general_fund_data
+                    WHERE YEAR(`date`) = {$year} AND MONTH(`date`) IN ({$monthsList})
+
+                    UNION ALL
+
+                    -- CATTLE/ANIMAL REGISTRATION FEES
+                    SELECT 'CATTLE/ANIMAL REGISTRATION FEES',
+                           (
+                               COALESCE(SUM(Cert_of_Ownership), 0) +
+                               COALESCE(SUM(Cert_of_Transfer), 0)
+                           )
+                    FROM general_fund_data
+                    WHERE YEAR(`date`) = {$year} AND MONTH(`date`) IN ({$monthsList})
+
+                    UNION ALL
+
+                    -- BUILDING PERMITS
+                    SELECT 'BUILDING PERMITS',
+                           (
+                               COALESCE(SUM(BUILDING_PERMIT_FEE), 0) +
+                               COALESCE(SUM(ELECTRICAL_FEE), 0)
+                           )
+                    FROM trust_fund_data
+                    WHERE YEAR(`DATE`) = {$year} AND MONTH(`DATE`) IN ({$monthsList})
+
+                    UNION ALL
+
+                    -- BUSINESS PERMITS
+                    SELECT 'BUSINESS PERMITS',
+                           COALESCE(SUM(Mayors_Permit), 0)
+                    FROM general_fund_data
+                    WHERE YEAR(`date`) = {$year} AND MONTH(`date`) IN ({$monthsList})
+
+                    UNION ALL
+
+                    -- ZONIAL/LOCATION PERMIT FEES
+                    SELECT 'ZONIAL/LOCATION PERMIT FEES',
+                           COALESCE(SUM(ZONING_FEE), 0)
+                    FROM trust_fund_data
+                    WHERE YEAR(`DATE`) = {$year} AND MONTH(`DATE`) IN ({$monthsList})
+                ) AS summary
+                GROUP BY category
+
                 UNION ALL
-                SELECT 'Weighs and Measure', SUM(Weighs_Measure) FROM ({$baseSql}) AS t
-                UNION ALL
-                SELECT 'Tricycle Operators', SUM(Tricycle_Operators) FROM ({$baseSql}) AS t
-                UNION ALL
-                SELECT 'Occupation Tax', SUM(Occupation_Tax) FROM ({$baseSql}) AS t
-                UNION ALL
-                SELECT 'Certificate of Ownership', SUM(Cert_of_Ownership) FROM ({$baseSql}) AS t
-                UNION ALL
-                SELECT 'Certificate of Transfer', SUM(Cert_of_Transfer) FROM ({$baseSql}) AS t
-                UNION ALL
-                SELECT 'Cockpit Prov Share', SUM(Cockpit_Prov_Share) FROM ({$baseSql}) AS t
-                UNION ALL
-                SELECT 'Cockpit Local Share', SUM(Cockpit_Local_Share) FROM ({$baseSql}) AS t
-                UNION ALL
-                SELECT 'Docking and Mooring Fee', SUM(Docking_Mooring_Fee) FROM ({$baseSql}) AS t
-                UNION ALL
-                SELECT 'Sultadas', SUM(Sultadas) FROM ({$baseSql}) AS t
-                UNION ALL
-                SELECT 'Miscellaneous Fees', SUM(Miscellaneous_Fee) FROM ({$baseSql}) AS t
-                UNION ALL
-                SELECT 'Registration of Birth', SUM(Reg_of_Birth) FROM ({$baseSql}) AS t
-                UNION ALL
-                SELECT 'Marriage Fees', SUM(Marriage_Fees) FROM ({$baseSql}) AS t
-                UNION ALL
-                SELECT 'Burial Fee', SUM(Burial_Fees) FROM ({$baseSql}) AS t
-                UNION ALL
-                SELECT 'Correction of Entry', SUM(Correction_of_Entry) FROM ({$baseSql}) AS t
-                UNION ALL
-                SELECT 'Fishing Permit Fee', SUM(Fishing_Permit_Fee) FROM ({$baseSql}) AS t
-                UNION ALL
-                SELECT 'Sale of Agri. Prod', SUM(Sale_of_Agri_Prod) FROM ({$baseSql}) AS t
-                UNION ALL
-                SELECT 'Sale of Acct Form', SUM(Sale_of_Acct_Form) FROM ({$baseSql}) AS t
-                UNION ALL
-                SELECT 'Overall Total', SUM(
-                    Mayors_Permit +
-                    Weighs_Measure +
-                    Tricycle_Operators +
-                    Occupation_Tax +
-                    Cert_of_Ownership +
-                    Cert_of_Transfer +
-                    Cockpit_Prov_Share +
-                    Cockpit_Local_Share +
-                    Docking_Mooring_Fee +
-                    Sultadas +
-                    Miscellaneous_Fee +
-                    Reg_of_Birth +
-                    Marriage_Fees +
-                    Burial_Fees +
-                    Correction_of_Entry +
-                    Fishing_Permit_Fee +
-                    Sale_of_Agri_Prod +
-                    Sale_of_Acct_Form
-                ) FROM ({$baseSql}) AS t
+
+                -- OVERALL TOTAL
+                SELECT 'OVERALL TOTAL', SUM(total)
+                FROM (
+                    SELECT COALESCE(SUM(Weighs_Measure),0) total FROM general_fund_data WHERE YEAR(`date`) = {$year} AND MONTH(`date`) IN ({$monthsList})
+                    UNION ALL
+                    SELECT COALESCE(SUM(Tricycle_Operators),0) FROM general_fund_data WHERE YEAR(`date`) = {$year} AND MONTH(`date`) IN ({$monthsList})
+                    UNION ALL
+                    SELECT COALESCE(SUM(Occupation_Tax),0) FROM general_fund_data WHERE YEAR(`date`) = {$year} AND MONTH(`date`) IN ({$monthsList})
+                    UNION ALL
+                    SELECT (
+                        COALESCE(SUM(Docking_Mooring_Fee),0) +
+                        COALESCE(SUM(Cockpit_Prov_Share),0) +
+                        COALESCE(SUM(Cockpit_Local_Share),0) +
+                        COALESCE(SUM(Sultadas),0) +
+                        COALESCE(SUM(Miscellaneous_Fee),0) +
+                        COALESCE(SUM(Fishing_Permit_Fee),0) +
+                        COALESCE(SUM(Sale_of_Agri_Prod),0) +
+                        COALESCE(SUM(Sale_of_Acct_Form),0)
+                    ) FROM general_fund_data WHERE YEAR(`date`) = {$year} AND MONTH(`date`) IN ({$monthsList})
+                    UNION ALL
+                    SELECT (
+                        COALESCE(SUM(LIVESTOCK_DEV_FUND),0) +
+                        COALESCE(SUM(DIVING_FEE),0)
+                    ) FROM trust_fund_data WHERE YEAR(`DATE`) = {$year} AND MONTH(`DATE`) IN ({$monthsList})
+                    UNION ALL
+                    SELECT (
+                        COALESCE(SUM(Reg_of_Birth),0) +
+                        COALESCE(SUM(Marriage_Fees),0) +
+                        COALESCE(SUM(Burial_Fees),0) +
+                        COALESCE(SUM(Correction_of_Entry),0)
+                    ) FROM general_fund_data WHERE YEAR(`date`) = {$year} AND MONTH(`date`) IN ({$monthsList})
+                    UNION ALL
+                    SELECT (
+                        COALESCE(SUM(Cert_of_Ownership),0) +
+                        COALESCE(SUM(Cert_of_Transfer),0)
+                    ) FROM general_fund_data WHERE YEAR(`date`) = {$year} AND MONTH(`date`) IN ({$monthsList})
+                    UNION ALL
+                    SELECT (
+                        COALESCE(SUM(BUILDING_PERMIT_FEE),0) +
+                        COALESCE(SUM(ELECTRICAL_FEE),0)
+                    ) FROM trust_fund_data WHERE YEAR(`DATE`) = {$year} AND MONTH(`DATE`) IN ({$monthsList})
+                    UNION ALL
+                    SELECT COALESCE(SUM(Mayors_Permit),0) FROM general_fund_data WHERE YEAR(`date`) = {$year} AND MONTH(`date`) IN ({$monthsList})
+                    UNION ALL
+                    SELECT COALESCE(SUM(ZONING_FEE),0) FROM trust_fund_data WHERE YEAR(`DATE`) = {$year} AND MONTH(`DATE`) IN ({$monthsList})
+                ) AS total_summary
             ";
 
-            // Because we use the same baseSql multiple times, we need to merge bindings accordingly
-            $finalBindings = array_merge(...array_fill(0, 19, $bindings));
+            $results = DB::select(DB::raw($sql));
 
-            $results = DB::select($unionQuery, $finalBindings);
+            return response()->json(['breakdown' => $results]);
 
-            return response()->json($results);
         } catch (\Exception $e) {
-            Log::error('Error generating regulatory fees report: ' . $e->getMessage());
-            return response()->json(['error' => 'Failed to fetch report'], 500);
+            Log::error("Error fetching regulatory fees: " . $e->getMessage());
+            return response()->json(['error' => 'Failed to fetch data'], 500);
         }
     }
 }
