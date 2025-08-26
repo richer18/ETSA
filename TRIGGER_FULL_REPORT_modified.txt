@@ -1,0 +1,212 @@
+DELIMITER $$
+
+-- 🔹 CTC (Cedula)
+
+
+CREATE TRIGGER trg_update_ctc_after_insert
+AFTER INSERT ON cedula
+FOR EACH ROW
+BEGIN
+    IF EXISTS (SELECT 1 FROM full_report_rcd WHERE date = NEW.DATEISSUED) THEN
+        UPDATE full_report_rcd
+        SET ctc = (SELECT SUM(TOTALAMOUNTPAID) FROM cedula WHERE DATEISSUED = NEW.DATEISSUED),
+            gfAndTf = COALESCE(GF,0) + COALESCE(TF,0),
+            rcdTotal =
+                COALESCE(ctc,0) + COALESCE(rpt,0) + COALESCE(GF,0) + COALESCE(TF,0) + COALESCE(dueFrom,0)
+                + CASE WHEN comment = 'Under' THEN COALESCE(CTCunder,0) ELSE -COALESCE(CTCunder,0) END
+                + CASE WHEN comment = 'Under' THEN COALESCE(CTCover,0) ELSE -COALESCE(CTCover,0) END
+                + CASE WHEN comment = 'Under' THEN COALESCE(RPTunder,0) ELSE -COALESCE(RPTunder,0) END
+                + CASE WHEN comment = 'Under' THEN COALESCE(RPTover,0) ELSE -COALESCE(RPTover,0) END
+                + CASE WHEN comment = 'Under' THEN COALESCE(GFTFunder,0) ELSE -COALESCE(GFTFover,0) END
+        WHERE date = NEW.DATEISSUED;
+    ELSE
+        INSERT INTO full_report_rcd (
+            date, ctc, rpt, GF, TF, gfAndTf, dueFrom, rcdTotal,
+            comment, CTCunder, CTCover, RPTunder, RPTover, GFTFunder, GFTFover
+        )
+        VALUES (
+            NEW.DATEISSUED,
+            (SELECT SUM(TOTALAMOUNTPAID) FROM cedula WHERE DATEISSUED = NEW.DATEISSUED),
+            0, 0, 0, 0, 0,
+            (SELECT SUM(TOTALAMOUNTPAID) FROM cedula WHERE DATEISSUED = NEW.DATEISSUED),
+            '', 0, 0, 0, 0, 0, 0
+        );
+    END IF;
+END$$
+
+CREATE TRIGGER trg_update_ctc_after_update
+AFTER UPDATE ON cedula
+FOR EACH ROW
+BEGIN
+    UPDATE full_report_rcd
+    SET ctc = (SELECT SUM(TOTALAMOUNTPAID) FROM cedula WHERE DATEISSUED = NEW.DATEISSUED),
+        gfAndTf = COALESCE(GF,0) + COALESCE(TF,0),
+        rcdTotal =
+            COALESCE(ctc,0) + COALESCE(rpt,0) + COALESCE(GF,0) + COALESCE(TF,0) + COALESCE(dueFrom,0)
+            + CASE WHEN comment = 'Under' THEN COALESCE(CTCunder,0) ELSE -COALESCE(CTCunder,0) END
+            + CASE WHEN comment = 'Under' THEN COALESCE(CTCover,0) ELSE -COALESCE(CTCover,0) END
+            + CASE WHEN comment = 'Under' THEN COALESCE(RPTunder,0) ELSE -COALESCE(RPTunder,0) END
+            + CASE WHEN comment = 'Under' THEN COALESCE(RPTover,0) ELSE -COALESCE(RPTover,0) END
+            + CASE WHEN comment = 'Under' THEN COALESCE(GFTFunder,0) ELSE -COALESCE(GFTFover,0) END
+    WHERE date = NEW.DATEISSUED;
+END$$
+
+
+-- 🔹 RPT (Real Property Tax)
+
+
+CREATE TRIGGER trg_update_rpt_after_insert
+AFTER INSERT ON real_property_tax_data
+FOR EACH ROW
+BEGIN
+    IF EXISTS (SELECT 1 FROM full_report_rcd WHERE date = NEW.date) THEN
+        UPDATE full_report_rcd
+        SET rpt = (SELECT SUM(total) FROM real_property_tax_data WHERE date = NEW.date),
+            gfAndTf = COALESCE(GF,0) + COALESCE(TF,0),
+            rcdTotal =
+                COALESCE(ctc,0) + COALESCE(rpt,0) + COALESCE(GF,0) + COALESCE(TF,0) + COALESCE(dueFrom,0)
+                + CASE WHEN comment = 'Under' THEN COALESCE(CTCunder,0) ELSE -COALESCE(CTCunder,0) END
+                + CASE WHEN comment = 'Under' THEN COALESCE(CTCover,0) ELSE -COALESCE(CTCover,0) END
+                + CASE WHEN comment = 'Under' THEN COALESCE(RPTunder,0) ELSE -COALESCE(RPTunder,0) END
+                + CASE WHEN comment = 'Under' THEN COALESCE(RPTover,0) ELSE -COALESCE(RPTover,0) END
+                + CASE WHEN comment = 'Under' THEN COALESCE(GFTFunder,0) ELSE -COALESCE(GFTFover,0) END
+        WHERE date = NEW.date;
+    ELSE
+        INSERT INTO full_report_rcd (
+            date, rpt, ctc, GF, TF, gfAndTf, dueFrom, rcdTotal,
+            comment, CTCunder, CTCover, RPTunder, RPTover, GFTFunder, GFTFover
+        )
+        VALUES (
+            NEW.date,
+            (SELECT SUM(total) FROM real_property_tax_data WHERE date = NEW.date),
+            0, 0, 0, 0, 0,
+            (SELECT SUM(total) FROM real_property_tax_data WHERE date = NEW.date),
+            '', 0, 0, 0, 0, 0, 0
+        );
+    END IF;
+END$$
+
+CREATE TRIGGER trg_update_rpt_after_update
+AFTER UPDATE ON real_property_tax_data
+FOR EACH ROW
+BEGIN
+    UPDATE full_report_rcd
+    SET rpt = (SELECT SUM(total) FROM real_property_tax_data WHERE date = NEW.date),
+        gfAndTf = COALESCE(GF,0) + COALESCE(TF,0),
+        rcdTotal =
+            COALESCE(ctc,0) + COALESCE(rpt,0) + COALESCE(GF,0) + COALESCE(TF,0) + COALESCE(dueFrom,0)
+            + CASE WHEN comment = 'Under' THEN COALESCE(CTCunder,0) ELSE -COALESCE(CTCunder,0) END
+            + CASE WHEN comment = 'Under' THEN COALESCE(CTCover,0) ELSE -COALESCE(CTCover,0) END
+            + CASE WHEN comment = 'Under' THEN COALESCE(RPTunder,0) ELSE -COALESCE(RPTunder,0) END
+            + CASE WHEN comment = 'Under' THEN COALESCE(RPTover,0) ELSE -COALESCE(RPTover,0) END
+            + CASE WHEN comment = 'Under' THEN COALESCE(GFTFunder,0) ELSE -COALESCE(GFTFover,0) END
+    WHERE date = NEW.date;
+END$$
+
+-- 🔹 GF (General Fund)
+
+CREATE TRIGGER trg_update_gf_after_insert
+AFTER INSERT ON general_fund_data
+FOR EACH ROW
+BEGIN
+    IF EXISTS (SELECT 1 FROM full_report_rcd WHERE date = NEW.date) THEN
+        UPDATE full_report_rcd
+        SET GF = (SELECT SUM(total) FROM general_fund_data WHERE date = NEW.date),
+            gfAndTf = COALESCE(GF,0) + COALESCE(TF,0),
+            rcdTotal =
+                COALESCE(ctc,0) + COALESCE(rpt,0) + COALESCE(GF,0) + COALESCE(TF,0) + COALESCE(dueFrom,0)
+                + CASE WHEN comment = 'Under' THEN COALESCE(CTCunder,0) ELSE -COALESCE(CTCunder,0) END
+                + CASE WHEN comment = 'Under' THEN COALESCE(CTCover,0) ELSE -COALESCE(CTCover,0) END
+                + CASE WHEN comment = 'Under' THEN COALESCE(RPTunder,0) ELSE -COALESCE(RPTunder,0) END
+                + CASE WHEN comment = 'Under' THEN COALESCE(RPTover,0) ELSE -COALESCE(RPTover,0) END
+                + CASE WHEN comment = 'Under' THEN COALESCE(GFTFunder,0) ELSE -COALESCE(GFTFover,0) END
+        WHERE date = NEW.date;
+    ELSE
+        INSERT INTO full_report_rcd (
+            date, GF, ctc, rpt, TF, gfAndTf, dueFrom, rcdTotal,
+            comment, CTCunder, CTCover, RPTunder, RPTover, GFTFunder, GFTFover
+        )
+        VALUES (
+            NEW.date,
+            (SELECT SUM(total) FROM general_fund_data WHERE date = NEW.date),
+            0, 0, 0,
+            (SELECT SUM(total) FROM general_fund_data WHERE date = NEW.date),
+            0,
+            (SELECT SUM(total) FROM general_fund_data WHERE date = NEW.date),
+            '', 0, 0, 0, 0, 0, 0
+        );
+    END IF;
+END$$
+
+CREATE TRIGGER trg_update_gf_after_update
+AFTER UPDATE ON general_fund_data
+FOR EACH ROW
+BEGIN
+    UPDATE full_report_rcd
+    SET GF = (SELECT SUM(total) FROM general_fund_data WHERE date = NEW.date),
+        gfAndTf = COALESCE(GF,0) + COALESCE(TF,0),
+        rcdTotal =
+            COALESCE(ctc,0) + COALESCE(rpt,0) + COALESCE(GF,0) + COALESCE(TF,0) + COALESCE(dueFrom,0)
+            + CASE WHEN comment = 'Under' THEN COALESCE(CTCunder,0) ELSE -COALESCE(CTCunder,0) END
+            + CASE WHEN comment = 'Under' THEN COALESCE(CTCover,0) ELSE -COALESCE(CTCover,0) END
+            + CASE WHEN comment = 'Under' THEN COALESCE(RPTunder,0) ELSE -COALESCE(RPTunder,0) END
+            + CASE WHEN comment = 'Under' THEN COALESCE(RPTover,0) ELSE -COALESCE(RPTover,0) END
+            + CASE WHEN comment = 'Under' THEN COALESCE(GFTFunder,0) ELSE -COALESCE(GFTFover,0) END
+    WHERE date = NEW.date;
+END$$
+
+
+-- 🔹 TF (Trust Fund)
+
+
+CREATE TRIGGER trg_update_tf_after_insert
+AFTER INSERT ON trust_fund_data
+FOR EACH ROW
+BEGIN
+    IF EXISTS (SELECT 1 FROM full_report_rcd WHERE date = NEW.DATE) THEN
+        UPDATE full_report_rcd
+        SET TF = (SELECT SUM(TOTAL) FROM trust_fund_data WHERE DATE = NEW.DATE),
+            gfAndTf = COALESCE(GF,0) + COALESCE(TF,0),
+            rcdTotal =
+                COALESCE(ctc,0) + COALESCE(rpt,0) + COALESCE(GF,0) + COALESCE(TF,0) + COALESCE(dueFrom,0)
+                + CASE WHEN comment = 'Under' THEN COALESCE(CTCunder,0) ELSE -COALESCE(CTCunder,0) END
+                + CASE WHEN comment = 'Under' THEN COALESCE(CTCover,0) ELSE -COALESCE(CTCover,0) END
+                + CASE WHEN comment = 'Under' THEN COALESCE(RPTunder,0) ELSE -COALESCE(RPTunder,0) END
+                + CASE WHEN comment = 'Under' THEN COALESCE(RPTover,0) ELSE -COALESCE(RPTover,0) END
+                + CASE WHEN comment = 'Under' THEN COALESCE(GFTFunder,0) ELSE -COALESCE(GFTFover,0) END
+        WHERE date = NEW.DATE;
+    ELSE
+        INSERT INTO full_report_rcd (
+            date, TF, ctc, rpt, GF, gfAndTf, dueFrom, rcdTotal,
+            comment, CTCunder, CTCover, RPTunder, RPTover, GFTFunder, GFTFover
+        )
+        VALUES (
+            NEW.DATE,
+            (SELECT SUM(TOTAL) FROM trust_fund_data WHERE DATE = NEW.DATE),
+            0, 0, 0,
+            (SELECT SUM(TOTAL) FROM trust_fund_data WHERE DATE = NEW.DATE),
+            0,
+            (SELECT SUM(TOTAL) FROM trust_fund_data WHERE DATE = NEW.DATE),
+            '', 0, 0, 0, 0, 0, 0
+        );
+    END IF;
+END$$
+
+CREATE TRIGGER trg_update_tf_after_update
+AFTER UPDATE ON trust_fund_data
+FOR EACH ROW
+BEGIN
+    UPDATE full_report_rcd
+    SET TF = (SELECT SUM(TOTAL) FROM trust_fund_data WHERE DATE = NEW.DATE),
+        gfAndTf = COALESCE(GF,0) + COALESCE(TF,0),
+        rcdTotal =
+            COALESCE(ctc,0) + COALESCE(rpt,0) + COALESCE(GF,0) + COALESCE(TF,0) + COALESCE(dueFrom,0)
+            + CASE WHEN comment = 'Under' THEN COALESCE(CTCunder,0) ELSE -COALESCE(CTCunder,0) END
+            + CASE WHEN comment = 'Under' THEN COALESCE(CTCover,0) ELSE -COALESCE(CTCover,0) END
+            + CASE WHEN comment = 'Under' THEN COALESCE(RPTunder,0) ELSE -COALESCE(RPTunder,0) END
+            + CASE WHEN comment = 'Under' THEN COALESCE(RPTover,0) ELSE -COALESCE(RPTover,0) END
+            + CASE WHEN comment = 'Under' THEN COALESCE(GFTFunder,0) ELSE -COALESCE(GFTFover,0) END
+    WHERE date = NEW.DATE;
+END$$
+
+DELIMITER ;
