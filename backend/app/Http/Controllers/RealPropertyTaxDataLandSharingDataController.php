@@ -20,7 +20,10 @@ class RealPropertyTaxDataLandSharingDataController extends Controller
 
             // 🧱 Build base query
             $query = DB::table('real_property_tax_data')
-                ->where('status', 'LIKE', 'LAND%');
+    ->where(function ($q) {
+        $q->where('status', 'LIKE', 'LAND%')
+          ->orWhere('status', '=', 'SPECIAL');
+    });
 
             // 📅 Filter by specific date
             if ($year && $month && $day) {

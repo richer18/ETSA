@@ -102,6 +102,12 @@ use App\Http\Controllers\UpdateReportDataController;
 use App\Http\Controllers\SaveAdjustmentDataController;
 
 use App\Http\Controllers\PsicCodeDataController;
+use App\Http\Controllers\CommunityTaxCertificateDeleteCedulaDataController;
+
+use App\Http\Controllers\WaterWorksRegisterJSONDataController;
+use App\Http\Controllers\WaterWorksAccountsJSONDataController;
+use App\Http\Controllers\WaterWorksAccountNumberJSONDataController;
+use App\Http\Controllers\WaterWorksAccountNumberPaymentJSONDataController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -248,3 +254,40 @@ Route::post('/update-report', [UpdateReportDataController::class, 'updateReport'
 Route::post('/save-adjustment', [SaveAdjustmentDataController::class, 'saveAdjustment']);
 
 Route::get('/datapsic', [PsicCodeDataController::class, 'getDataPsic']);
+Route::delete('/deleteCedula/{id}', [CommunityTaxCertificateDeleteCedulaDataController::class, 'delete']);
+
+Route::post('/register', [WaterWorksRegisterJSONDataController::class, 'register']);
+Route::get('/accounts', [WaterWorksAccountsJSONDataController::class, 'index']);
+Route::get('/account/{accountNumber}', [WaterWorksAccountNumberJSONDataController::class, 'show']);
+Route::post('/account/{accountNumber}/pay', [WaterWorksAccountNumberPaymentJSONDataController::class, 'pay']);
+
+
+Route::get('/test-json', function () {
+    $dataDir = storage_path("waterworks");
+
+    if (!File::exists($dataDir)) {
+        File::makeDirectory($dataDir, 0777, true, true);
+    }
+
+    $filePath = $dataDir . DIRECTORY_SEPARATOR . "test.json";
+
+    $testData = [
+        "time" => now()->toDateTimeString(),
+        "message" => "Test JSON write"
+    ];
+
+    File::put($filePath, json_encode($testData, JSON_PRETTY_PRINT));
+
+    return response()->json([
+        "saved_to" => $filePath,
+        "exists" => File::exists($filePath)
+    ]);
+});
+
+
+Route::get('/check-storage', function () {
+    return storage_path('waterworks');
+});
+
+Route::get("/test-save", [WaterWorksRegisterJSONDataController::class, "testSave"]);
+

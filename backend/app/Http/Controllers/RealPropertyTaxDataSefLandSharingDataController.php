@@ -32,47 +32,47 @@ class RealPropertyTaxDataSefLandSharingDataController extends Controller
 
             // 🧠 Query with Common Table Expression
             $sql = "
-                WITH LandData AS (
-                    SELECT 'Current' AS category,
-                        SUM(IFNULL(additional_current_year, 0) - IFNULL(additional_discounts, 0)) AS amount
-                    FROM real_property_tax_data
-                    WHERE status LIKE 'LAND-%' {$dateFilter}
+    WITH LandData AS (
+        SELECT 'Current' AS category,
+            SUM(IFNULL(additional_current_year, 0) - IFNULL(additional_discounts, 0)) AS amount
+        FROM real_property_tax_data
+        WHERE (status LIKE 'LAND-%' OR status = 'SPECIAL') {$dateFilter}  -- 🟢 Added SPECIAL
 
-                    UNION ALL
+        UNION ALL
 
-                    SELECT 'Prior' AS category,
-                        SUM(IFNULL(additional_prev_year, 0) + IFNULL(additional_prior_years, 0)) AS amount
-                    FROM real_property_tax_data
-                    WHERE status LIKE 'LAND-%' {$dateFilter}
+        SELECT 'Prior' AS category,
+            SUM(IFNULL(additional_prev_year, 0) + IFNULL(additional_prior_years, 0)) AS amount
+        FROM real_property_tax_data
+        WHERE (status LIKE 'LAND-%' OR status = 'SPECIAL') {$dateFilter}  -- 🟢 Added SPECIAL
 
-                    UNION ALL
+        UNION ALL
 
-                    SELECT 'Penalties' AS category,
-                        SUM(
-                            IFNULL(additional_penalties, 0) +
-                            IFNULL(additional_prev_penalties, 0) +
-                            IFNULL(additional_prior_penalties, 0)
-                        ) AS amount
-                    FROM real_property_tax_data
-                    WHERE status LIKE 'LAND-%' {$dateFilter}
-                )
+        SELECT 'Penalties' AS category,
+            SUM(
+                IFNULL(additional_penalties, 0) +
+                IFNULL(additional_prev_penalties, 0) +
+                IFNULL(additional_prior_penalties, 0)
+            ) AS amount
+        FROM real_property_tax_data
+        WHERE (status LIKE 'LAND-%' OR status = 'SPECIAL') {$dateFilter}  -- 🟢 Added SPECIAL
+    )
 
-                SELECT
-                    category,
-                    amount AS LAND,
-                    amount * 0.50 AS `50% Prov’l Share`,
-                    amount * 0.50 AS `50% Mun. Share`
-                FROM LandData
+    SELECT
+        category,
+        amount AS LAND,
+        amount * 0.50 AS `50% Prov’l Share`,
+        amount * 0.50 AS `50% Mun. Share`
+    FROM LandData
 
-                UNION ALL
+    UNION ALL
 
-                SELECT
-                    'TOTAL' AS category,
-                    SUM(amount) AS LAND,
-                    SUM(amount) * 0.50 AS `50% Prov’l Share`,
-                    SUM(amount) * 0.50 AS `50% Mun. Share`
-                FROM LandData;
-            ";
+    SELECT
+        'TOTAL' AS category,
+        SUM(amount) AS LAND,
+        SUM(amount) * 0.50 AS `50% Prov’l Share`,
+        SUM(amount) * 0.50 AS `50% Mun. Share`
+    FROM LandData;
+";
 
             $results = DB::select($sql);
             Log::info("✅ SEF Land Sharing Data fetched successfully");

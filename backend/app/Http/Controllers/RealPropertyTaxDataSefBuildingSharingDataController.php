@@ -32,56 +32,57 @@ class RealPropertyTaxDataSefBuildingSharingDataController extends Controller
 
             // 🧠 Query with breakdown and totals
             $sql = "
-                SELECT 'Current' AS category,
-                    SUM(IFNULL(additional_current_year, 0) - IFNULL(additional_discounts, 0)) AS `BUILDING`,
-                    SUM((IFNULL(additional_current_year, 0) - IFNULL(additional_discounts, 0)) * 0.50) AS `50% Prov’l Share`,
-                    SUM((IFNULL(additional_current_year, 0) - IFNULL(additional_discounts, 0)) * 0.50) AS `50% Mun. Share`
-                FROM real_property_tax_data
-                {$where}
+    SELECT 'Current' AS category,
+        ROUND(SUM(IFNULL(additional_current_year, 0) - IFNULL(additional_discounts, 0)), 2) AS `BUILDING`,
+        ROUND(SUM((IFNULL(additional_current_year, 0) - IFNULL(additional_discounts, 0)) * 0.50), 2) AS `50% Prov’l Share`,
+        ROUND(SUM((IFNULL(additional_current_year, 0) - IFNULL(additional_discounts, 0)) * 0.50), 2) AS `50% Mun. Share`
+    FROM real_property_tax_data
+    {$where}
 
-                UNION ALL
+    UNION ALL
 
-                SELECT 'Prior' AS category,
-                    SUM(IFNULL(additional_prev_year, 0) + IFNULL(additional_prior_years, 0)) AS `BUILDING`,
-                    SUM((IFNULL(additional_prev_year, 0) + IFNULL(additional_prior_years, 0)) * 0.50) AS `50% Prov’l Share`,
-                    SUM((IFNULL(additional_prev_year, 0) + IFNULL(additional_prior_years, 0)) * 0.50) AS `50% Mun. Share`
-                FROM real_property_tax_data
-                {$where}
+    SELECT 'Prior' AS category,
+        ROUND(SUM(IFNULL(additional_prev_year, 0) + IFNULL(additional_prior_years, 0)), 2) AS `BUILDING`,
+        ROUND(SUM((IFNULL(additional_prev_year, 0) + IFNULL(additional_prior_years, 0)) * 0.50), 2) AS `50% Prov’l Share`,
+        ROUND(SUM((IFNULL(additional_prev_year, 0) + IFNULL(additional_prior_years, 0)) * 0.50), 2) AS `50% Mun. Share`
+    FROM real_property_tax_data
+    {$where}
 
-                UNION ALL
+    UNION ALL
 
-                SELECT 'Penalties' AS category,
-                    SUM(
-                        IFNULL(additional_penalties, 0) +
-                        IFNULL(additional_prev_penalties, 0) +
-                        IFNULL(additional_prior_penalties, 0)
-                    ) AS `BUILDING`,
-                    SUM((IFNULL(additional_penalties, 0) + IFNULL(additional_prev_penalties, 0) + IFNULL(additional_prior_penalties, 0)) * 0.50) AS `50% Prov’l Share`,
-                    SUM((IFNULL(additional_penalties, 0) + IFNULL(additional_prev_penalties, 0) + IFNULL(additional_prior_penalties, 0)) * 0.50) AS `50% Mun. Share`
-                FROM real_property_tax_data
-                {$where}
+    SELECT 'Penalties' AS category,
+        ROUND(SUM(
+            IFNULL(additional_penalties, 0) +
+            IFNULL(additional_prev_penalties, 0) +
+            IFNULL(additional_prior_penalties, 0)
+        ), 2) AS `BUILDING`,
+        ROUND(SUM((IFNULL(additional_penalties, 0) + IFNULL(additional_prev_penalties, 0) + IFNULL(additional_prior_penalties, 0)) * 0.50), 2) AS `50% Prov’l Share`,
+        ROUND(SUM((IFNULL(additional_penalties, 0) + IFNULL(additional_prev_penalties, 0) + IFNULL(additional_prior_penalties, 0)) * 0.50), 2) AS `50% Mun. Share`
+    FROM real_property_tax_data
+    {$where}
 
-                UNION ALL
+    UNION ALL
 
-                SELECT 'TOTAL' AS category,
-                    SUM(
-                        (IFNULL(additional_current_year, 0) - IFNULL(additional_discounts, 0)) +
-                        (IFNULL(additional_prev_year, 0) + IFNULL(additional_prior_years, 0)) +
-                        (IFNULL(additional_penalties, 0) + IFNULL(additional_prev_penalties, 0) + IFNULL(additional_prior_penalties, 0))
-                    ) AS `BUILDING`,
-                    SUM((
-                        (IFNULL(additional_current_year, 0) - IFNULL(additional_discounts, 0)) +
-                        (IFNULL(additional_prev_year, 0) + IFNULL(additional_prior_years, 0)) +
-                        (IFNULL(additional_penalties, 0) + IFNULL(additional_prev_penalties, 0) + IFNULL(additional_prior_penalties, 0))
-                    ) * 0.50) AS `50% Prov’l Share`,
-                    SUM((
-                        (IFNULL(additional_current_year, 0) - IFNULL(additional_discounts, 0)) +
-                        (IFNULL(additional_prev_year, 0) + IFNULL(additional_prior_years, 0)) +
-                        (IFNULL(additional_penalties, 0) + IFNULL(additional_prev_penalties, 0) + IFNULL(additional_prior_penalties, 0))
-                    ) * 0.50) AS `50% Mun. Share`
-                FROM real_property_tax_data
-                {$where}
-            ";
+    SELECT 'TOTAL' AS category,
+        ROUND(SUM(
+            (IFNULL(additional_current_year, 0) - IFNULL(additional_discounts, 0)) +
+            (IFNULL(additional_prev_year, 0) + IFNULL(additional_prior_years, 0)) +
+            (IFNULL(additional_penalties, 0) + IFNULL(additional_prev_penalties, 0) + IFNULL(additional_prior_penalties, 0))
+        ), 2) AS `BUILDING`,
+        ROUND(SUM((
+            (IFNULL(additional_current_year, 0) - IFNULL(additional_discounts, 0)) +
+            (IFNULL(additional_prev_year, 0) + IFNULL(additional_prior_years, 0)) +
+            (IFNULL(additional_penalties, 0) + IFNULL(additional_prev_penalties, 0) + IFNULL(additional_prior_penalties, 0))
+        ) * 0.50), 2) AS `50% Prov’l Share`,
+        ROUND(SUM((
+            (IFNULL(additional_current_year, 0) - IFNULL(additional_discounts, 0)) +
+            (IFNULL(additional_prev_year, 0) + IFNULL(additional_prior_years, 0)) +
+            (IFNULL(additional_penalties, 0) + IFNULL(additional_prev_penalties, 0) + IFNULL(additional_prior_penalties, 0))
+        ) * 0.50), 2) AS `50% Mun. Share`
+    FROM real_property_tax_data
+    {$where}
+";
+
 
             $results = DB::select($sql);
             Log::info("✅ SEF Building Sharing Data fetched successfully");
