@@ -210,10 +210,10 @@ function PurchaseForm() {
             type="number"
             name="receipt_range_to"
             value={formData.receipt_range_to}
+            onChange={handleChange}
             required
             fullWidth
-            InputProps={{ readOnly: true }}
-            helperText="Auto-calculated from Receipt Range From"
+            helperText="Editable"
           />
 
           <TextField

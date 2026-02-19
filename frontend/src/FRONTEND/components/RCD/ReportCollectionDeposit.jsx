@@ -74,6 +74,13 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString("en-US", options);
 };
 
+const normalizeCollectorName = (value) =>
+  String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
 const months = [
   { label: "January", value: "1" },
   { label: "February", value: "2" },
@@ -154,6 +161,17 @@ function ReportCollectionDeposit() {
         message: "",
         severity: "info",
       });
+      const [editFormData, setEditFormData] = useState({
+        id: null,
+        issued_date: "",
+        collector: "",
+        type_of_receipt: "",
+        receipt_no_from: "",
+        receipt_no_to: "",
+        total: "",
+        status: "Not Remit",
+      });
+      const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
     
       const [reportDialog, setReportDialog] = useState({
         open: false,
@@ -213,6 +231,39 @@ function ReportCollectionDeposit() {
   useEffect(() => {
     fetchEntries();
   }, [month, year, searchQuery]);
+
+  useEffect(() => {
+    const rows = Array.isArray(filteredData) ? filteredData : [];
+    const getTotal = (row) => Number(row?.Total ?? row?.total ?? 0);
+    const getCollector = (row) => normalizeCollectorName(row?.Collector ?? row?.collector);
+
+    const collectorFlora = normalizeCollectorName("Flora My D. Ferrer");
+    const collectorEmily = normalizeCollectorName("Emily E. Credo");
+    const collectorRicardo = normalizeCollectorName("Ricardo T Enopia");
+    const collectorAgnes = normalizeCollectorName("Agnes B. Ello");
+
+    let all = 0;
+    let flora = 0;
+    let emily = 0;
+    let ricardo = 0;
+    let agnes = 0;
+
+    for (const row of rows) {
+      const total = getTotal(row);
+      const collector = getCollector(row);
+      all += total;
+      if (collector === collectorFlora) flora += total;
+      if (collector === collectorEmily) emily += total;
+      if (collector === collectorRicardo) ricardo += total;
+      if (collector === collectorAgnes) agnes += total;
+    }
+
+    setAllTotal(all);
+    setTaxOnBusinessTotal(flora);
+    setRegulatoryFeesTotal(emily);
+    setReceiptsFromEconomicEnterprisesTotal(ricardo);
+    setServiceUserChargesTotal(agnes);
+  }, [filteredData]);
 
   const getRowId = (row) => row?.id ?? row?.ID ?? null;
 
@@ -408,12 +459,58 @@ function ReportCollectionDeposit() {
 
   const handleEditClick = () => {
     if (!selectedRow) return;
-    setSnackbar({
-      open: true,
-      message: "Update action is ready for wiring to your update form.",
-      severity: "info",
+    setEditFormData({
+      id: getRowId(selectedRow),
+      issued_date: toDateKey(selectedRow?.issued_date || selectedRow?.Date || selectedRow?.date),
+      collector: selectedRow?.Collector || selectedRow?.collector || "",
+      type_of_receipt: selectedRow?.Type_Of_Receipt || selectedRow?.type_of_receipt || "",
+      receipt_no_from: String(selectedRow?.Receipt_No_From || selectedRow?.receipt_no_from || ""),
+      receipt_no_to: String(selectedRow?.Receipt_No_To || selectedRow?.receipt_no_to || ""),
+      total: String(selectedRow?.Total || selectedRow?.total || ""),
+      status: selectedRow?.Status || selectedRow?.status || "Not Remit",
     });
+    setOpenUpdateDialog(true);
     handleMenuClose();
+  };
+
+  const handleEditFieldChange = (name, value) => {
+    if (name === "receipt_no_from" || name === "receipt_no_to") {
+      setEditFormData((prev) => ({
+        ...prev,
+        [name]: String(value || "").replace(/\D/g, ""),
+      }));
+      return;
+    }
+    setEditFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSaveUpdate = async () => {
+    try {
+      if (!editFormData.id) return;
+      await axiosInstance.put(`/rcd-entries/${editFormData.id}`, {
+        issued_date: editFormData.issued_date,
+        collector: editFormData.collector,
+        type_of_receipt: editFormData.type_of_receipt,
+        receipt_no_from: String(editFormData.receipt_no_from || "").replace(/\D/g, ""),
+        receipt_no_to: String(editFormData.receipt_no_to || "").replace(/\D/g, ""),
+        total: Number(editFormData.total || 0),
+        status: editFormData.status,
+      });
+      setOpenUpdateDialog(false);
+      await fetchEntries();
+      setSnackbar({
+        open: true,
+        message: "Entry updated successfully.",
+        severity: "success",
+      });
+    } catch (error) {
+      const apiMessage = error?.response?.data?.message;
+      setSnackbar({
+        open: true,
+        message: apiMessage || "Failed to update entry.",
+        severity: "error",
+      });
+    }
   };
 
   const toInt = (value) => {
@@ -435,16 +532,7 @@ function ReportCollectionDeposit() {
   const sameCollector = (entryCollector, targetCollector) =>
     String(entryCollector || "").trim().toLowerCase() === String(targetCollector || "").trim().toLowerCase();
 
-  const sameType = (entryType, targetType) =>
-    String(entryType || "").trim().toLowerCase() === String(targetType || "").trim().toLowerCase();
-
-  const issuedQtyFromEntry = (entry) => {
-    const from = toInt(entry?.receipt_no_from ?? entry?.Receipt_No_From);
-    const to = toInt(entry?.receipt_no_to ?? entry?.Receipt_No_To);
-    return to >= from && from > 0 ? to - from + 1 : 0;
-  };
-
-  const buildAccountabilityRows = ({ collector, targetDateKey, issuedForms, collectorEntries }) => {
+  const buildAccountabilityRows = ({ collector, targetDateKey, issuedForms }) => {
     const relevantForms = issuedForms.filter((form) => {
       if (!sameCollector(form?.Collector ?? form?.collector, collector)) return false;
       const status = String(form?.Status ?? form?.status ?? "").toUpperCase();
@@ -471,70 +559,21 @@ function ReportCollectionDeposit() {
 
     const rows = [];
     latestByType.forEach((form, type) => {
-      const assignDateKey = toDateKey(form?.Date ?? form?.Date_Issued ?? form?.date ?? form?.date_issued);
-      const initialQty = toInt(
-        form?.Begginning_Balance_receipt_qty ??
-          form?.Receipt_Range_qty ??
-          form?.Stock ??
-          form?.stock
-      );
-      const initialFrom = toInt(
-        form?.Begginning_Balance_receipt_from ??
-          form?.Receipt_Range_From ??
-          form?.receipt_range_from
-      );
-      const initialTo = toInt(
-        form?.Begginning_Balance_receipt_to ??
-          form?.Receipt_Range_To ??
-          form?.receipt_range_to
-      );
+      const begQty = toInt(form?.Begginning_Balance_receipt_qty ?? form?.begginning_balance_receipt_qty);
+      const begFrom = form?.Begginning_Balance_receipt_from ?? form?.begginning_balance_receipt_from ?? 0;
+      const begTo = form?.Begginning_Balance_receipt_to ?? form?.begginning_balance_receipt_to ?? 0;
 
-      const scopedEntries = collectorEntries
-        .filter((entry) => sameType(entry?.type_of_receipt ?? entry?.Type_Of_Receipt, type))
-        .filter((entry) => {
-          const key = toDateKey(entry?.issued_date ?? entry?.Date ?? entry?.date);
-          if (!key) return false;
-          if (assignDateKey && key < assignDateKey) return false;
-          return key <= targetDateKey;
-        });
+      const recQty = toInt(form?.Receipt_Range_qty ?? form?.receipt_range_qty);
+      const recFrom = form?.Receipt_Range_From ?? form?.receipt_range_from ?? 0;
+      const recTo = form?.Receipt_Range_To ?? form?.receipt_range_to ?? 0;
 
-      const beforeEntries = scopedEntries.filter(
-        (entry) => toDateKey(entry?.issued_date ?? entry?.Date ?? entry?.date) < targetDateKey
-      );
-      const todayEntries = scopedEntries.filter(
-        (entry) => toDateKey(entry?.issued_date ?? entry?.Date ?? entry?.date) === targetDateKey
-      );
+      const issuedQty = toInt(form?.Issued_receipt_qty ?? form?.issued_receipt_qty);
+      const issuedFrom = form?.Issued_receipt_from ?? form?.issued_receipt_from ?? 0;
+      const issuedTo = form?.Issued_receipt_to ?? form?.issued_receipt_to ?? 0;
 
-      const cumulativeIssuedBefore = beforeEntries.reduce(
-        (sum, entry) => sum + issuedQtyFromEntry(entry),
-        0
-      );
-
-      const availableBefore = Math.max(initialQty - cumulativeIssuedBefore, 0);
-      const nextFromBefore = availableBefore > 0 ? initialFrom + cumulativeIssuedBefore : 0;
-
-      const isFirstUsageDay = cumulativeIssuedBefore === 0;
-      const begQty = isFirstUsageDay ? availableBefore : 0;
-      const begFrom = isFirstUsageDay && availableBefore > 0 ? initialFrom : 0;
-      const begTo = isFirstUsageDay && availableBefore > 0 ? initialTo : 0;
-
-      const recQty = isFirstUsageDay ? 0 : availableBefore;
-      const recFrom = isFirstUsageDay || availableBefore <= 0 ? 0 : nextFromBefore;
-      const recTo = isFirstUsageDay || availableBefore <= 0 ? 0 : initialTo;
-
-      const issuedQty = todayEntries.reduce((sum, entry) => sum + issuedQtyFromEntry(entry), 0);
-      const issuedFrom =
-        todayEntries.length > 0
-          ? Math.min(...todayEntries.map((entry) => toInt(entry?.receipt_no_from ?? entry?.Receipt_No_From)))
-          : 0;
-      const issuedTo =
-        todayEntries.length > 0
-          ? Math.max(...todayEntries.map((entry) => toInt(entry?.receipt_no_to ?? entry?.Receipt_No_To)))
-          : 0;
-
-      const endQty = Math.max(availableBefore - issuedQty, 0);
-      const endFrom = endQty > 0 ? nextFromBefore + issuedQty : 0;
-      const endTo = endQty > 0 ? initialTo : 0;
+      const endQty = toInt(form?.Ending_Balance_receipt_qty ?? form?.ending_balance_receipt_qty);
+      const endFrom = form?.Ending_Balance_receipt_from ?? form?.ending_balance_receipt_from ?? 0;
+      const endTo = form?.Ending_Balance_receipt_to ?? form?.ending_balance_receipt_to ?? 0;
 
       if (begQty <= 0 && recQty <= 0 && issuedQty <= 0 && endQty <= 0) return;
 
@@ -597,11 +636,42 @@ function ReportCollectionDeposit() {
       0
     );
 
+    const rowFund = row?.fund || row?.Fund || "";
+    const rowSerial = row?.serial_no || row?.Serial_No || "";
+    const rowType = row?.type_of_receipt || row?.Type_Of_Receipt || "";
+    const rowFrom = toInt(row?.receipt_no_from ?? row?.Receipt_No_From);
+    const rowTo = toInt(row?.receipt_no_to ?? row?.Receipt_No_To);
+
+    const matchingIssuedForms = (Array.isArray(issuedForms) ? issuedForms : [])
+      .filter((form) => sameCollector(form?.Collector ?? form?.collector, collector))
+      .filter((form) => {
+        const dateKey = toDateKey(form?.Date ?? form?.date ?? form?.Date_Issued ?? form?.date_issued);
+        return dateKey === targetDateKey;
+      })
+      .filter((form) => {
+        const formType = String(form?.Form_Type ?? form?.form_type ?? "").trim().toLowerCase();
+        return !rowType || formType === String(rowType).trim().toLowerCase();
+      })
+      .filter((form) => {
+        const serial = String(form?.Serial_No ?? form?.serial_no ?? "");
+        return !rowSerial || serial === String(rowSerial);
+      })
+      .sort((a, b) => Number(b?.ID ?? b?.id ?? 0) - Number(a?.ID ?? a?.id ?? 0));
+
+    const matchingIssuedForm =
+      matchingIssuedForms.find((form) => {
+        const issuedFrom = toInt(form?.Issued_receipt_from ?? form?.issued_receipt_from);
+        const issuedTo = toInt(form?.Issued_receipt_to ?? form?.issued_receipt_to);
+        if (rowFrom <= 0 || rowTo <= 0 || issuedFrom <= 0 || issuedTo <= 0) return false;
+        return issuedFrom <= rowFrom && issuedTo >= rowTo;
+      }) || matchingIssuedForms[0];
+
+    const resolvedFund = rowFund || matchingIssuedForm?.Fund || matchingIssuedForm?.fund || "GENERAL FUND";
+
     const autoAccountability = buildAccountabilityRows({
       collector,
       targetDateKey,
       issuedForms: Array.isArray(issuedForms) ? issuedForms : [],
-      collectorEntries,
     });
 
     console.log("PRINT PAYLOAD:", {
@@ -613,8 +683,8 @@ function ReportCollectionDeposit() {
 
     return {
       header: {
-        municipality: "MUNICIPALITY",
-        fund: "GENERAL FUND",
+        municipality: "Municipality Of Zamboanguita",
+        fund: resolvedFund,
         officer: collector || "ACCOUNTABLE OFFICER",
         liquidatingOfficer: collector || "ACCOUNTABLE OFFICER",
         bank: "Paul Ree Ambrose A. Martinez",
@@ -1284,28 +1354,28 @@ function ReportCollectionDeposit() {
             },
             {
               value: taxOnBusinessTotal,
-              text: "Collector 1",
+              text: "Flora My D. Ferrer",
               icon: <BusinessCenterIcon />,
               gradient: "linear-gradient(135deg, #2e7d32, #66bb6a)",
               onClick: handleClickTax,
             },
             {
               value: regulatoryFeesTotal,
-              text: "Collector 2",
+              text: "Emily E. Credo",
               icon: <GavelIcon />,
               gradient: "linear-gradient(135deg, #ed6c02, #ffb74d)",
               onClick: handleClickRF,
             },
             {
               value: receiptsFromEconomicEnterprisesTotal,
-              text: "Collector 3",
+              text: "Ricardo T Enopia",
               icon: <StorefrontIcon />,
               gradient: "linear-gradient(135deg, #6a1b9a, #ab47bc)",
               onClick: handleClickRFEE,
             },
             {
               value: serviceUserChargesTotal,
-              text: "Collector 4",
+              text: "Agnes B. Ello",
               icon: <ReceiptLongIcon />,
               gradient: "linear-gradient(135deg, #00838f, #4dd0e1)",
               onClick: handleClickSUC,
@@ -1598,6 +1668,79 @@ function ReportCollectionDeposit() {
                         </IconButton>
                       </DialogTitle>
                       <DialogContent>{dialogContent}</DialogContent>
+                    </Dialog>
+                    <Dialog
+                      open={openUpdateDialog}
+                      onClose={() => setOpenUpdateDialog(false)}
+                      maxWidth="sm"
+                      fullWidth
+                    >
+                      <DialogTitle>Update Entry</DialogTitle>
+                      <DialogContent>
+                        <Box sx={{ display: "grid", gap: 2, mt: 1 }}>
+                          <TextField
+                            label="Date"
+                            type="date"
+                            value={editFormData.issued_date}
+                            onChange={(e) => handleEditFieldChange("issued_date", e.target.value)}
+                            InputLabelProps={{ shrink: true }}
+                            fullWidth
+                          />
+                          <TextField
+                            label="Collector"
+                            value={editFormData.collector}
+                            onChange={(e) => handleEditFieldChange("collector", e.target.value)}
+                            fullWidth
+                          />
+                          <TextField
+                            label="Type of Receipt"
+                            value={editFormData.type_of_receipt}
+                            onChange={(e) => handleEditFieldChange("type_of_receipt", e.target.value)}
+                            fullWidth
+                          />
+                          <TextField
+                            label="Receipt No. From"
+                            value={editFormData.receipt_no_from}
+                            onChange={(e) => handleEditFieldChange("receipt_no_from", e.target.value)}
+                            inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                            fullWidth
+                          />
+                          <TextField
+                            label="Receipt No. To"
+                            value={editFormData.receipt_no_to}
+                            onChange={(e) => handleEditFieldChange("receipt_no_to", e.target.value)}
+                            inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                            fullWidth
+                          />
+                          <TextField
+                            label="Total"
+                            type="number"
+                            value={editFormData.total}
+                            onChange={(e) => handleEditFieldChange("total", e.target.value)}
+                            inputProps={{ min: 0, step: "0.01" }}
+                            fullWidth
+                          />
+                          <TextField
+                            select
+                            label="Status"
+                            value={editFormData.status}
+                            onChange={(e) => handleEditFieldChange("status", e.target.value)}
+                            fullWidth
+                          >
+                            <MenuItem value="Remit">Remit</MenuItem>
+                            <MenuItem value="Not Remit">Not Remit</MenuItem>
+                            <MenuItem value="Deposit">Deposit</MenuItem>
+                            <MenuItem value="Approve">Approve</MenuItem>
+                            <MenuItem value="Purchase">Purchase</MenuItem>
+                          </TextField>
+                        </Box>
+                      </DialogContent>
+                      <DialogActions>
+                        <Button onClick={() => setOpenUpdateDialog(false)}>Cancel</Button>
+                        <Button variant="contained" onClick={handleSaveUpdate}>
+                          Save Changes
+                        </Button>
+                      </DialogActions>
                     </Dialog>
 
                     <Dialog

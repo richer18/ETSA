@@ -20,10 +20,16 @@ const collectors = [
 ];
 
 const sortBySerialNo = (a, b) =>
-  String(a?.serial_no ?? "").localeCompare(String(b?.serial_no ?? ""), undefined, {
+  String(a?.serial_no ?? a?.Serial_No ?? "").localeCompare(String(b?.serial_no ?? b?.Serial_No ?? ""), undefined, {
     numeric: true,
     sensitivity: "base",
   });
+
+const getFormType = (form) => form?.form_type ?? form?.Form_Type ?? "";
+const getSerialNo = (form) => form?.serial_no ?? form?.Serial_No ?? "";
+const getRangeFrom = (form) => form?.receipt_range_from ?? form?.Receipt_Range_From ?? "";
+const getRangeTo = (form) => form?.receipt_range_to ?? form?.Receipt_Range_To ?? "";
+const getStock = (form) => form?.stock ?? form?.Stock ?? 50;
 
 function AssignAccountableForms({ onClose }) {
   const [formData, setFormData] = useState({
@@ -82,6 +88,11 @@ function AssignAccountableForms({ onClose }) {
       alert(apiMessage ? `Failed to assign form: ${apiMessage}` : 'Failed to assign form.');
     });
 };
+
+  const formTypes = Array.from(new Set(availableForms.map((f) => getFormType(f)).filter(Boolean)));
+  const serialOptions = availableForms
+    .filter((f) => getFormType(f) === formData.Form_Type)
+    .sort(sortBySerialNo);
 
   return (
     <Paper
@@ -161,23 +172,23 @@ function AssignAccountableForms({ onClose }) {
   onChange={(e) => {
     const selectedType = e.target.value;
     const formsByType = availableForms
-      .filter((f) => f.form_type === selectedType)
+      .filter((f) => getFormType(f) === selectedType)
       .sort(sortBySerialNo);
     const firstFormInOrder = formsByType[0];
 
     setFormData((prev) => ({
       ...prev,
       Form_Type: selectedType,
-      Serial_No: firstFormInOrder?.serial_no || "",
-      Receipt_Range_From: firstFormInOrder?.receipt_range_from || "",
-      Receipt_Range_To: firstFormInOrder?.receipt_range_to || "",
-      Stock: firstFormInOrder?.stock ?? 50,
+      Serial_No: getSerialNo(firstFormInOrder) || "",
+      Receipt_Range_From: getRangeFrom(firstFormInOrder) || "",
+      Receipt_Range_To: getRangeTo(firstFormInOrder) || "",
+      Stock: getStock(firstFormInOrder),
     }));
   }}
   fullWidth
   required
 >
-  {Array.from(new Set(availableForms.map(f => f.form_type))).map((type) => (
+  {formTypes.map((type) => (
     <MenuItem key={type} value={type}>{type}</MenuItem>
   ))}
 </TextField>
@@ -189,29 +200,29 @@ function AssignAccountableForms({ onClose }) {
   value={formData.Serial_No}
   onChange={(e) => {
     const selectedSerial = e.target.value;
-    const form = availableForms.find(f => f.serial_no === selectedSerial);
+    const form = availableForms.find((f) => getSerialNo(f) === selectedSerial);
 
     if (form) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        Serial_No: form.serial_no,
-        Receipt_Range_From: form.receipt_range_from,
-        Receipt_Range_To: form.receipt_range_to,
-        Stock: form.stock,
+        Serial_No: getSerialNo(form),
+        Receipt_Range_From: getRangeFrom(form),
+        Receipt_Range_To: getRangeTo(form),
+        Stock: getStock(form),
       }));
     }
   }}
   fullWidth
   required
 >
-  {availableForms
-    .filter(f => f.form_type === formData.Form_Type) // only show serials for selected Form Type
-    .sort(sortBySerialNo)
-    .map(f => (
-      <MenuItem key={f.serial_no} value={f.serial_no}>
-        {f.serial_no}
+  {serialOptions.map((f) => {
+    const serial = getSerialNo(f);
+    return (
+      <MenuItem key={serial} value={serial}>
+        {serial}
       </MenuItem>
-    ))}
+    );
+  })}
 </TextField>
         </Box>
 
@@ -238,9 +249,10 @@ function AssignAccountableForms({ onClose }) {
 
 <TextField
   label="Receipt Range To"
-  name="receipt_range_to"
+  name="Receipt_Range_To"
   value={formData.Receipt_Range_To}
-  InputProps={{ readOnly: true }}
+  onChange={handleChange}
+  inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
   fullWidth
 />
 

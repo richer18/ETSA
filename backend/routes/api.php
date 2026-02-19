@@ -341,6 +341,7 @@ Route::post('/assign-forms', [AssignFormController::class, 'store']);
 Route::get('/issued-forms', [IssuedFormController::class, 'index']);
 Route::get('/rcd-entries', [RcdEntryController::class, 'index']);
 Route::post('/rcd-entries', [RcdEntryController::class, 'store']);
+Route::put('/rcd-entries/{id}', [RcdEntryController::class, 'update']);
 
 
 

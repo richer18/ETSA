@@ -7,26 +7,57 @@ use App\Models\PurchaseAccountableForm;
 
 class PurchaseController extends Controller
 {
+    private function normalizeDigitsString($value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $digits = preg_replace('/\D+/', '', (string) $value);
+        return $digits === '' ? null : $digits;
+    }
+
+    private function toInt($value): int
+    {
+        return (int) ltrim((string) $value, '0');
+    }
+
     public function store(Request $request)
     {
-        $request->validate([
+        $payload = [
+            'purchase_date' => $request->input('purchase_date'),
+            'form_type' => $request->input('form_type'),
+            'serial_no' => $request->input('serial_no'),
+            'receipt_range_from' => $this->normalizeDigitsString($request->input('receipt_range_from')),
+            'receipt_range_to' => $this->normalizeDigitsString($request->input('receipt_range_to')),
+            'stock' => (int) $request->input('stock'),
+            'status' => $request->input('status'),
+        ];
+
+        $validated = validator($payload, [
             'purchase_date' => 'required|date',
             'form_type' => 'required|string',
             'serial_no' => 'required|string',
-            'receipt_range_from' => 'required|integer',
-            'receipt_range_to' => 'required|integer|gte:receipt_range_from',
+            'receipt_range_from' => 'required|string|regex:/^\d+$/',
+            'receipt_range_to' => 'required|string|regex:/^\d+$/',
             'stock' => 'required|integer',
             'status' => 'required|in:AVAILABLE,USED,CANCELLED',
-        ]);
+        ])->validate();
+
+        if ($this->toInt($validated['receipt_range_to']) < $this->toInt($validated['receipt_range_from'])) {
+            return response()->json([
+                'message' => 'The receipt range to field must be greater than or equal to receipt range from.',
+            ], 422);
+        }
 
         $purchase = PurchaseAccountableForm::create([
-            'purchase_date' => $request->purchase_date,
-            'Form_Type' => $request->form_type,
-            'Serial_No' => $request->serial_no,
-            'Receipt_Range_From' => $request->receipt_range_from,
-            'Receipt_Range_To' => $request->receipt_range_to,
-            'Stock' => $request->stock,
-            'Status' => $request->status,
+            'purchase_date' => $validated['purchase_date'],
+            'Form_Type' => $validated['form_type'],
+            'Serial_No' => $validated['serial_no'],
+            'Receipt_Range_From' => $validated['receipt_range_from'],
+            'Receipt_Range_To' => $validated['receipt_range_to'],
+            'Stock' => $validated['stock'],
+            'Status' => $validated['status'],
         ]);
 
         return response()->json([
