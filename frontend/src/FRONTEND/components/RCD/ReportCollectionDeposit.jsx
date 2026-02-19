@@ -689,7 +689,7 @@ function ReportCollectionDeposit() {
         liquidatingOfficer: collector || "ACCOUNTABLE OFFICER",
         bank: "Paul Ree Ambrose A. Martinez",
         reference: "",
-        treasurer: "MUNICIPAL TREASURER",
+        treasurer: "Paul Ree Ambrose A. Martinez",
       },
       formattedDate: formatDate(rowDate),
       shortDate: Number.isNaN(dateObj.getTime()) ? "" : dateObj.toLocaleDateString("en-US"),
