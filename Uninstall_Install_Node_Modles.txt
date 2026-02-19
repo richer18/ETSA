@@ -1,0 +1,4 @@
+USING POWERSHELL
+1. Remove-Item -Recurse -Force node_modules, package-lock.json
+2. npm cache clean --force
+3. npm install

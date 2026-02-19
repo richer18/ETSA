@@ -1,0 +1,118 @@
+/* Global base styles */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* ========================= */
+/*        PRINT STYLES       */
+/* ========================= */
+@media print {
+
+  /* Only hide top-level siblings of printable area */
+  body > *:not(#printableArea) {
+    display: none !important;
+  }
+
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  #root {
+    height: auto !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
+  #printableArea {
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+  }
+
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-family: Arial, sans-serif !important;
+    font-size: 10px !important;
+    page-break-inside: auto !important;
+  }
+
+  thead {
+    display: table-header-group !important; /* Repeat header each page */
+  }
+
+  tfoot {
+    display: table-footer-group !important;
+  }
+
+  tr {
+    page-break-inside: auto !important; /* Allow breaking between rows */
+  }
+
+  th, td {
+    border: 1px solid black !important;
+    padding: 6px !important;
+    text-align: center !important;
+  }
+
+  th {
+    background-color: #f2f2f2 !important;
+    font-weight: bold !important;
+    font-size: 11px !important;
+  }
+
+  h6, .subtitle {
+    font-size: 12px !important;
+    text-align: center !important;
+    font-weight: bold !important;
+    margin: 6px 0 !important;
+    font-family: Arial, sans-serif !important;
+  }
+
+  .custom-footer {
+    text-align: center !important;
+    font-size: 10px !important;
+    margin-top: 10mm !important;
+    font-family: Arial, sans-serif !important;
+  }
+
+  .page-break {
+    display: block !important;
+    page-break-after: always !important;
+    break-after: page !important;
+    height: 0 !important;
+    visibility: hidden !important;
+  }
+
+  /* Let the browser decide the page size */
+  @page {
+    size: auto;
+    margin: 10mm;
+  }
+
+  /* Adjust column widths if needed */
+  th:nth-child(1), td:nth-child(1)   { width: 18% !important; }
+  th:nth-child(2), td:nth-child(2)   { width: 14% !important; }
+  th:nth-child(3), td:nth-child(3)   { width: 10% !important; }
+  th:nth-child(4), td:nth-child(4)   { width: 9% !important; }
+  th:nth-child(5), td:nth-child(5)   { width: 9% !important; }
+  th:nth-child(6), td:nth-child(6)   { width: 9% !important; }
+  th:nth-child(7), td:nth-child(7)   { width: 9% !important; }
+  th:nth-child(8), td:nth-child(8)   { width: 9% !important; }
+  th:nth-child(9), td:nth-child(9)   { width: 9% !important; }
+  th:nth-child(10), td:nth-child(10) { width: 9% !important; }
+  th:nth-child(11), td:nth-child(11) { width: 6% !important; }
+  th:nth-child(12), td:nth-child(12) { width: 6% !important; }
+}

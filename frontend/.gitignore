@@ -1,0 +1,26 @@
+# ✅ Dependencies - still ignore
+/node_modules
+/.pnp
+.pnp.js
+
+# ✅ Testing
+/coverage
+
+# ✅ Production build
+/build
+
+# ✅ System files
+.DS_Store
+
+# 🔐 ENV files (keep some ignored, allow root .env)
+.env              # ✅ Include this line to track `.env`
+!.env             # ✅ UN-ignore `.env` in root
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ✅ Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
