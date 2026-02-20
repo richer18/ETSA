@@ -29,11 +29,15 @@ import Grid from "@mui/material/Grid";
 import Link from "@mui/material/Link";
 import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import CircularProgress from "@mui/material/CircularProgress";
+import LinearProgress from "@mui/material/LinearProgress";
+import Chip from "@mui/material/Chip";
 import Typography from "@mui/material/Typography";
 import { createTheme, styled } from "@mui/material/styles";
 import { AppProvider } from "@toolpad/core/AppProvider";
@@ -54,7 +58,7 @@ import "./system.css";
 const NAVIGATION = [
   {
     kind: "header",
-    title: "Main items",
+    title: "Core Operations",
   },
   {
     segment: "my-app",
@@ -62,8 +66,18 @@ const NAVIGATION = [
     icon: <DashboardIcon sx={{ color: "primary.main" }} />,
   },
   {
+    segment: "rcd",
+    title: "Report of Collection and Deposit",
+    icon: <AssignmentIcon sx={{ color: "primary.main" }} />,
+  },
+  {
+    segment: "calendar",
+    title: "Calendar",
+    icon: <CalendarMonthIcon sx={{ color: "primary.main" }} />,
+  },
+  {
     title: "Abstract",
-    icon: <ArticleIcon sx={{ color: "text.secondary" }} />,
+    icon: <ArticleIcon sx={{ color: "secondary.main" }} />,
     children: [
       {
         segment: "Real-Property-Tax",
@@ -89,7 +103,7 @@ const NAVIGATION = [
   },
   {
     title: "Business",
-    icon: <BusinessIcon sx={{ color: "text.secondary" }} />,
+    icon: <BusinessIcon sx={{ color: "warning.main" }} />,
     children: [
       {
         segment: "business-registration",
@@ -109,71 +123,110 @@ const NAVIGATION = [
     ],
   },
   {
-    title: "Ticket",
-    icon: <BookOnlineIcon sx={{ color: "text.secondary" }} />,
+    title: "Tickets",
+    icon: <BookOnlineIcon sx={{ color: "info.main" }} />,
     children: [
       {
         segment: "dive-ticket",
-        title: "DIVING TICKET",
+        title: "Diving Ticket",
         icon: <ScubaDivingIcon sx={{ color: "info.dark" }} />,
       },
       {
         segment: "cash-ticket",
-        title: "CASH TICKET",
+        title: "Cash Ticket",
         icon: <SellIcon sx={{ color: "secondary.main" }} />,
       },
     ],
   },
   {
-    segment: "rcd",
-    title: "Report of Collection and Deposit",
-    icon: <CalendarMonthIcon sx={{ color: "primary.main" }} />,
+    segment: "doc-stamp",
+    title: "Doc Stamp",
+    icon: <AssignmentIcon sx={{ color: "primary.main" }} />,
   },
   {
-    segment: "calendar",
-    title: "CALENDAR",
-    icon: <CalendarMonthIcon sx={{ color: "primary.main" }} />,
+    segment: "water-works",
+    title: "Water Works",
+    icon: <WaterDropIcon sx={{ color: "info.main" }} />,
+  },
+  {
+    kind: "divider",
+  },
+  {
+    kind: "header",
+    title: "Administration",
   },
   {
     segment: "import",
-    title: "Import",
+    title: "Import Data",
     icon: <ImportExportIcon sx={{ color: "info.main" }} />,
     children: [
       {
         segment: "import-general-fund",
         title: "General Fund",
-        icon: <DescriptionIcon sx={{ color: "secondary.main" }} />,
+        icon: <AccountBalanceWalletIcon sx={{ color: "success.main" }} />,
       },
       {
         segment: "import-trust-fund",
         title: "Trust Fund",
-        icon: <DescriptionIcon sx={{ color: "secondary.main" }} />,
+        icon: <GavelIcon sx={{ color: "warning.main" }} />,
       },
       {
         segment: "import-real-property-tax",
         title: "Real Property Tax",
-        icon: <DescriptionIcon sx={{ color: "secondary.main" }} />,
+        icon: <HouseIcon sx={{ color: "primary.main" }} />,
       },
       {
         segment: "import-cedula",
         title: "Cedula",
-        icon: <DescriptionIcon sx={{ color: "secondary.main" }} />,
+        icon: <AssignmentIndIcon sx={{ color: "info.main" }} />,
       },
     ],
   },
   {
-    segment: "doc-stamp",
-    title: "DOC STAMP",
-    icon: <AssignmentIcon sx={{ color: "primary.main" }} />,
-  },
-  {
-    segment: "water-works",
-    title: "WATER",
-    icon: <WaterDropIcon sx={{ color: "info.main" }} />,
+    segment: "template",
+    title: "Templates",
+    icon: <DescriptionIcon sx={{ color: "info.main" }} />,
+    children: [
+      {
+        segment: "email-inbox",
+        title: "Voucher",
+        icon: <AssignmentIcon sx={{ color: "primary.main" }} />,
+      },
+      {
+        segment: "email-sent",
+        title: "RCD GF",
+        icon: <ArticleIcon sx={{ color: "success.main" }} />,
+      },
+      {
+        segment: "email-sent",
+        title: "RCD SEF",
+        icon: <BookOnlineIcon sx={{ color: "success.main" }} />,
+      },
+      {
+        segment: "email-sent",
+        title: "MCH Application",
+        icon: <DirectionsTransitFilledIcon sx={{ color: "warning.main" }} />,
+      },
+      {
+        segment: "email-sent",
+        title: "MCH Certification",
+        icon: <HowToRegIcon sx={{ color: "info.main" }} />,
+      },
+      {
+        segment: "email-sent",
+        title: "MCH Order",
+        icon: <SellIcon sx={{ color: "secondary.main" }} />,
+      },
+      {
+        segment: "email-sent",
+        title: "MCH Clearance",
+        icon: <GavelIcon sx={{ color: "primary.main" }} />,
+      },
+    ],
   },
   {
     segment: "email",
-    title: "E-MAIL",
+    title: "Email",
     icon: <EmailIcon sx={{ color: "error.main" }} />,
     children: [
       {
@@ -195,51 +248,8 @@ const NAVIGATION = [
   },
   {
     segment: "register-user",
-    title: "USER REGISTRATION",
+    title: "User Registration",
     icon: <AppRegistrationIcon sx={{ color: "info.main" }} />,
-  },
-
-  {
-    segment: "template",
-    title: "TEMPLATE",
-    icon: <AppRegistrationIcon sx={{ color: "info.main" }} />,
-    children: [
-      {
-        segment: "email-inbox",
-        title: "VOUCHER",
-        icon: <InboxIcon sx={{ color: "primary.main" }} />,
-      },
-      {
-        segment: "email-sent",
-        title: "RCD GF",
-        icon: <SendIcon sx={{ color: "success.main" }} />,
-      },
-      {
-        segment: "email-sent",
-        title: "RCD SEF",
-        icon: <SendIcon sx={{ color: "success.main" }} />,
-      },
-      {
-        segment: "email-sent",
-        title: "MCH - APPLICATION",
-        icon: <SendIcon sx={{ color: "success.main" }} />,
-      },
-      {
-        segment: "email-sent",
-        title: "MCH - CERTIFICATION",
-        icon: <SendIcon sx={{ color: "success.main" }} />,
-      },
-      {
-        segment: "email-sent",
-        title: "MCH - ORDER",
-        icon: <SendIcon sx={{ color: "success.main" }} />,
-      },
-      {
-        segment: "email-sent",
-        title: "MCH - CLEARANCE",
-        icon: <SendIcon sx={{ color: "success.main" }} />,
-      },
-    ],
   },
   {
     kind: "divider",
@@ -427,32 +437,42 @@ const Item = styled(Paper)(({ theme }) => ({
 
 function DashboardCard({ title, subtitle, value, loading, children }) {
   return (
-    <Item>
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-        <div>
-          <Typography variant="subtitle2" color="text.secondary">
-            {title}
-          </Typography>
-          {subtitle && (
-            <Typography variant="caption" color="text.secondary">
-              {subtitle}
+    <Card
+      sx={{
+        borderRadius: 3,
+        border: "1px solid",
+        borderColor: "divider",
+        boxShadow: "0 10px 24px rgba(12, 35, 64, 0.08)",
+        height: "100%",
+      }}
+    >
+      <CardContent sx={{ p: 2.5 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+          <div>
+            <Typography variant="subtitle2" color="text.secondary">
+              {title}
             </Typography>
-          )}
-        </div>
-        <div>
-          {loading ? (
-            <CircularProgress size={20} />
-          ) : (
-            <Typography variant="h6">{value}</Typography>
-          )}
-        </div>
-      </Box>
-      {children}
-    </Item>
+            {subtitle && (
+              <Typography variant="caption" color="text.secondary">
+                {subtitle}
+              </Typography>
+            )}
+          </div>
+          <div>
+            {loading ? (
+              <CircularProgress size={20} />
+            ) : (
+              <Typography variant="h6">{value}</Typography>
+            )}
+          </div>
+        </Box>
+        {children}
+      </CardContent>
+    </Card>
   );
 }
 
-function DashboardHome() {
+function DashboardHomeLegacy() {
   const [showFilter, setShowFilter] = React.useState(false);
   const [month, setMonth] = React.useState(new Date().getMonth() + 1);
   const [year, setYear] = React.useState(new Date().getFullYear());
@@ -683,6 +703,235 @@ function DashboardHome() {
         </Grid>
       </Box>
     </div>
+  );
+}
+
+function DashboardHome() {
+  const [showFilter, setShowFilter] = React.useState(false);
+  const [month, setMonth] = React.useState(new Date().getMonth() + 1);
+  const [year, setYear] = React.useState(new Date().getFullYear());
+  const [data, setData] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
+
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const fetchData = React.useCallback(async () => {
+    setLoading(true);
+    try {
+      const resp = await axiosInstance.get("fetch-report");
+      const rows = Array.isArray(resp.data) ? resp.data : [];
+      setData(rows);
+    } catch (error) {
+      console.error("Dashboard fetch failed", error);
+      setData([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [month, year]);
+
+  React.useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const handleApplyFilter = () => {
+    fetchData();
+    setShowFilter(false);
+  };
+
+  const exportCsv = () => {
+    const monthIndex = Number(month) - 1;
+    const rows = data.filter((r) => {
+      const d = r.date ? new Date(r.date) : null;
+      if (!d) return false;
+      return d.getMonth() === monthIndex && d.getFullYear() === Number(year);
+    });
+    const headers = Object.keys(rows[0] || {}).filter(Boolean);
+    const escape = (val) => `"${String(val ?? "").replace(/"/g, '""')}"`;
+    const csv = [headers.join(",")]
+      .concat(rows.map((r) => headers.map((h) => escape(r[h])).join(",")))
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `dashboard_export_${year}_${month}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <Box sx={{ px: { xs: 0.5, md: 1 }, pb: 2 }}>
+      <Paper
+        sx={{
+          mb: 2,
+          p: { xs: 2, md: 3 },
+          borderRadius: 4,
+          background:
+            "linear-gradient(135deg, rgba(20,41,109,0.98) 0%, rgba(26,82,173,0.95) 55%, rgba(19,127,140,0.92) 100%)",
+          color: "white",
+          boxShadow: "0 18px 36px rgba(9, 30, 66, 0.28)",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            gap: 2,
+            flexWrap: "wrap",
+          }}
+        >
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 700, letterSpacing: 0.2 }}>
+              Treasurer's Dashboard
+            </Typography>
+            <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.8 }}>
+              Municipal Treasury Operations Overview, {year}
+            </Typography>
+            <Box sx={{ mt: 1.6, display: "flex", gap: 1, flexWrap: "wrap" }}>
+              <Chip
+                label={`Month: ${months[month - 1]}`}
+                size="small"
+                sx={{ bgcolor: "rgba(255,255,255,0.16)", color: "white" }}
+              />
+              <Chip
+                label={`Year: ${year}`}
+                size="small"
+                sx={{ bgcolor: "rgba(255,255,255,0.16)", color: "white" }}
+              />
+              <Chip
+                label={loading ? "Syncing..." : "Data Ready"}
+                size="small"
+                sx={{
+                  bgcolor: loading ? "rgba(255,193,7,0.25)" : "rgba(76,175,80,0.25)",
+                  color: "white",
+                }}
+              />
+            </Box>
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Button
+              variant="contained"
+              onClick={() => setShowFilter((s) => !s)}
+              sx={{
+                bgcolor: "rgba(255,255,255,0.16)",
+                "&:hover": { bgcolor: "rgba(255,255,255,0.25)" },
+              }}
+            >
+              Filter Period
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={exportCsv}
+              sx={{
+                color: "white",
+                borderColor: "rgba(255,255,255,0.55)",
+                "&:hover": {
+                  borderColor: "white",
+                  bgcolor: "rgba(255,255,255,0.08)",
+                },
+              }}
+            >
+              Export Reports
+            </Button>
+          </Box>
+        </Box>
+      </Paper>
+
+      {showFilter && (
+        <Paper sx={{ p: 2, mb: 2, borderRadius: 3 }}>
+          <Box sx={{ display: "flex", gap: 2, alignItems: "center", flexWrap: "wrap" }}>
+            <FormControl size="small">
+              <InputLabel id="month-label">Month</InputLabel>
+              <Select
+                labelId="month-label"
+                value={month}
+                label="Month"
+                onChange={(e) => setMonth(e.target.value)}
+                sx={{ minWidth: 160 }}
+              >
+                {months.map((m, i) => (
+                  <MenuItem key={m} value={i + 1}>
+                    {m}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <FormControl size="small">
+              <InputLabel id="year-label">Year</InputLabel>
+              <Select
+                labelId="year-label"
+                value={year}
+                label="Year"
+                onChange={(e) => setYear(e.target.value)}
+                sx={{ minWidth: 120 }}
+              >
+                {Array.from({ length: 8 }).map((_, idx) => {
+                  const y = new Date().getFullYear() - idx;
+                  return (
+                    <MenuItem key={y} value={y}>
+                      {y}
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </FormControl>
+
+            <Button variant="contained" onClick={handleApplyFilter}>
+              Apply
+            </Button>
+            <Button variant="text" onClick={() => setShowFilter(false)}>
+              Close
+            </Button>
+          </Box>
+        </Paper>
+      )}
+
+      {loading && <LinearProgress sx={{ mb: 2, borderRadius: 10 }} />}
+
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={6}>
+          <TaxCollected />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <CedulaCollected />
+        </Grid>
+
+        <Grid item xs={12}>
+          <Paper
+            sx={{
+              p: 2.5,
+              borderRadius: 3,
+              border: "1px solid",
+              borderColor: "divider",
+              textAlign: "left",
+            }}
+          >
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 0.8 }}>
+              Quick Notes
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Use the month and year filter to align chart summaries and export the same reporting
+              slice. This panel can be extended for alerts such as missed remittances, low
+              collection days, or pending approvals.
+            </Typography>
+          </Paper>
+        </Grid>
+      </Grid>
+    </Box>
   );
 }
 

@@ -95,10 +95,19 @@ const years = [
 //  Helper: Format date
 // ------------------------
 const formatDate = (dateString) => {
+  if (!dateString) return "-";
   const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return "-";
   const options = { month: "short", day: "numeric", year: "numeric" };
   return date.toLocaleDateString("en-US", options);
 };
+
+const toNumber = (value) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const formatFixed2 = (value) => toNumber(value).toFixed(2);
 
 // ------------------------
 //   Main Component
@@ -146,9 +155,9 @@ function Cedula({ ...props }) {
     severity: "info",
   });
 
-  const [rows, setRows] = React.useState([]);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const [viewRow, setViewRow] = useState(null);
 
   const [reportDialog, setReportDialog] = useState({
     open: false,
@@ -181,22 +190,25 @@ function Cedula({ ...props }) {
     }, 300);
   };
 
+  const fetchCedulaData = React.useCallback(async () => {
+    try {
+      const response = await axiosInstance.get("/cedula");
+      const rows = Array.isArray(response.data) ? response.data : [];
+      setData(rows);
+      setFilteredData(rows);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setData([]);
+      setFilteredData([]);
+    }
+  }, []);
+
   // ------------------------
   //  1) Fetch data once
   // ------------------------
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axiosInstance.get("/cedula");
-        setData(response.data);
-        setFilteredData(response.data); // Initialize with the full dataset
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchData();
-  }, []);
+    fetchCedulaData();
+  }, [fetchCedulaData]);
 
   // ------------------------
   //  2) Filter by Month , Day, & Year
@@ -289,6 +301,8 @@ function Cedula({ ...props }) {
           ctcno: selectedRow.CTCNO, // Use `CTCNO` instead of `CTC_ID`
         }}
         mode="edit"
+        onSaved={fetchCedulaData}
+        onClose={handleClose}
       />
     );
     setIsDialogOpen(true);
@@ -308,20 +322,13 @@ function Cedula({ ...props }) {
   // “View” from the menu
   const handleViewClick = () => {
     if (!selectedRow) return;
-    setDialogContent(
-      <CedulaFundDialog
-        open={true}
-        onClose={handleCloseDialog}
-        data={selectedRow}
-      />
-    );
-    setIsDialogOpen(true);
+    setViewRow(selectedRow);
     handleMenuClose();
   };
 
   // Close the “View” dialog
   const handleCloseDialog = () => {
-    setIsDialogOpen(false);
+    setViewRow(null);
   };
 
   // ------------------------
@@ -435,24 +442,30 @@ function Cedula({ ...props }) {
     if (!selectedId) return;
 
     try {
-      const response = await fetch(`deleteCedula/${selectedId}`, {
-        method: "DELETE",
+      const response = await axiosInstance.delete(
+        `/deleteCedula/${encodeURIComponent(selectedId)}`
+      );
+
+      setSnackbar({
+        open: true,
+        message: response?.data?.message || "Record deleted successfully.",
+        severity: "success",
       });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        alert("Record deleted successfully");
-        setRows((prev) => prev.filter((row) => row.id !== selectedId));
-      } else {
-        alert(result.error || "Failed to delete record");
-      }
+      await fetchCedulaData();
     } catch (error) {
       console.error("Error deleting record:", error);
-      alert("Error deleting record");
+      setSnackbar({
+        open: true,
+        message:
+          error?.response?.data?.error ||
+          error?.response?.data?.message ||
+          "Error deleting record.",
+        severity: "error",
+      });
     } finally {
       setOpenDeleteDialog(false);
       setSelectedId(null);
+      handleMenuClose();
     }
   };
 
@@ -590,7 +603,9 @@ function Cedula({ ...props }) {
                     boxShadow: "0 2px 6px rgba(25, 118, 210, 0.2)",
                   }}
                   onClick={() =>
-                    handleClickOpen(<Cedulas onClose={handleClose} />)
+                    handleClickOpen(
+                      <Cedulas onClose={handleClose} onSaved={fetchCedulaData} />
+                    )
                   }
                 >
                   New Entry
@@ -898,50 +913,48 @@ function Cedula({ ...props }) {
             </TableHead>
 
             <TableBody>
-              {filteredData
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row, idx) => (
-                  <TableRow key={row?.["CTC NO"] || row?.id || idx}>
-                    <TableCell align="center">{formatDate(row.DATE)}</TableCell>
-                    <TableCell align="center">{row["CTC NO"]}</TableCell>
-                    <TableCell align="center">{row.LOCAL}</TableCell>
-                    <TableCell align="center">{row.NAME}</TableCell>
-                    <TableCell align="center">
-                      {parseFloat(row.BASIC).toFixed(2)}
-                    </TableCell>
-                    <TableCell align="center">
-                      {parseFloat(row.TAX_DUE).toFixed(2)}
-                    </TableCell>
-                    <TableCell align="center">
-                      {parseFloat(row.INTEREST).toFixed(2)}
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography
-                        variant="body2"
-                        fontWeight={600}
-                        color="success.main"
-                      >
-                        {new Intl.NumberFormat("en-PH", {
-                          style: "currency",
-                          currency: "PHP",
-                          minimumFractionDigits: 2,
-                        }).format(row.TOTALAMOUNTPAID)}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="center">{row.CASHIER}</TableCell>
-                    <TableCell align="center">
-                      <Button
-                        aria-controls="simple-menu"
-                        aria-haspopup="true"
-                        onClick={(event) => handleMenuClick(event, row)}
-                        variant="contained"
-                        color="primary"
-                      >
-                        ACTIONS
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+              {filteredData.length === 0 ? (
+                <TableRow>
+                  <TableCell align="center" colSpan={10}>
+                    No records found.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredData
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row, idx) => (
+                    <TableRow key={row?.CTC_ID || row?.["CTC NO"] || row?.id || idx}>
+                      <TableCell align="center">{formatDate(row?.DATE)}</TableCell>
+                      <TableCell align="center">{row?.["CTC NO"] || "-"}</TableCell>
+                      <TableCell align="center">{row?.LOCAL || "-"}</TableCell>
+                      <TableCell align="center">{row?.NAME || "-"}</TableCell>
+                      <TableCell align="center">{formatFixed2(row?.BASIC)}</TableCell>
+                      <TableCell align="center">{formatFixed2(row?.TAX_DUE)}</TableCell>
+                      <TableCell align="center">{formatFixed2(row?.INTEREST)}</TableCell>
+                      <TableCell align="center">
+                        <Typography variant="body2" fontWeight={600} color="success.main">
+                          {new Intl.NumberFormat("en-PH", {
+                            style: "currency",
+                            currency: "PHP",
+                            minimumFractionDigits: 2,
+                          }).format(toNumber(row?.TOTALAMOUNTPAID))}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">{row?.CASHIER || "-"}</TableCell>
+                      <TableCell align="center">
+                        <Button
+                          aria-controls="simple-menu"
+                          aria-haspopup="true"
+                          onClick={(event) => handleMenuClick(event, row)}
+                          variant="contained"
+                          color="primary"
+                        >
+                          ACTIONS
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+              )}
             </TableBody>
           </Table>
 
@@ -977,8 +990,10 @@ function Cedula({ ...props }) {
         <MenuItem
           onClick={(e) => {
             e.stopPropagation();
-            setSelectedId(rows.id);
+            const targetId = selectedRow?.CTC_ID ?? selectedRow?.["CTC NO"] ?? selectedRow?.CTCNO ?? null;
+            setSelectedId(targetId);
             setOpenDeleteDialog(true);
+            handleMenuClose();
           }}
         >
           Delete
@@ -998,6 +1013,14 @@ function Cedula({ ...props }) {
         <PopupDialog open={isDialogOpen} onClose={handleClose}>
           {dialogContent}
         </PopupDialog>
+      )}
+
+      {!!viewRow && (
+        <CedulaFundDialog
+          open={Boolean(viewRow)}
+          onClose={handleCloseDialog}
+          data={viewRow}
+        />
       )}
 
       {/* Confirmation Dialog */}

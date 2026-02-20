@@ -74,6 +74,68 @@ const pick = (row, keys) => {
   return '';
 };
 
+const groupIssuedForms = (rows) => {
+  const groups = new Map();
+
+  for (const row of rows) {
+    const formType = pick(row, ['Form_Type', 'form_type']);
+    const serialNo = pick(row, ['Serial_No', 'serial_no']);
+    const collector = pick(row, ['Collector', 'collector']);
+    const rowDate = pick(row, ['Date', 'date', 'Date_Issued', 'date_issued']);
+    const rangeFrom = pick(row, ['Receipt_Range_From', 'receipt_range_from']);
+    const rangeTo = pick(row, ['Receipt_Range_To', 'receipt_range_to']);
+    const stock = pick(row, ['Stock', 'stock']);
+    const status = pick(row, ['Status', 'status']);
+    const rowId = pick(row, ['ID', 'id']);
+
+    const key = `${collector}__${formType}__${serialNo}`;
+    const parsedDate = rowDate ? dayjs(rowDate) : null;
+    const existing = groups.get(key);
+
+    if (!existing) {
+      groups.set(key, {
+        rowDate,
+        earliestDate: parsedDate,
+        formType,
+        serialNo,
+        rangeFrom,
+        rangeTo,
+        collector,
+        stock,
+        status,
+        rowId,
+        latestDate: parsedDate,
+      });
+      continue;
+    }
+
+    if (parsedDate && (!existing.earliestDate || parsedDate.isBefore(existing.earliestDate))) {
+      existing.earliestDate = parsedDate;
+      existing.rowDate = rowDate;
+    }
+
+    if (parsedDate && (!existing.latestDate || parsedDate.isAfter(existing.latestDate))) {
+      existing.latestDate = parsedDate;
+      existing.stock = stock;
+      existing.status = status;
+      existing.rowId = rowId || existing.rowId;
+    }
+
+    if ((existing.rangeFrom === '' || existing.rangeFrom === 0 || existing.rangeFrom === '0') && rangeFrom !== '') {
+      existing.rangeFrom = rangeFrom;
+    }
+    if ((existing.rangeTo === '' || existing.rangeTo === 0 || existing.rangeTo === '0') && rangeTo !== '') {
+      existing.rangeTo = rangeTo;
+    }
+  }
+
+  return Array.from(groups.values()).sort((a, b) => {
+    const aTime = a?.earliestDate?.isValid?.() ? a.earliestDate.valueOf() : 0;
+    const bTime = b?.earliestDate?.isValid?.() ? b.earliestDate.valueOf() : 0;
+    return bTime - aTime;
+  });
+};
+
 function IssueForm({ onBack }) {
   const [data, setData] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(null);
@@ -93,6 +155,8 @@ function IssueForm({ onBack }) {
         setData([]);
       });
   }, [selectedMonth, selectedYear]);
+
+  const displayRows = groupIssuedForms(data);
 
   return (
     <>
@@ -180,26 +244,17 @@ function IssueForm({ onBack }) {
             </StyledTableRow>
           </TableHead>
           <TableBody>
-            {data.map((row, index) => {
-              const rowDate = pick(row, ['Date', 'date', 'Date_Issued', 'date_issued']);
-              const formType = pick(row, ['Form_Type', 'form_type']);
-              const serialNo = pick(row, ['Serial_No', 'serial_no']);
-              const rangeFrom = pick(row, ['Receipt_Range_From', 'receipt_range_from']);
-              const rangeTo = pick(row, ['Receipt_Range_To', 'receipt_range_to']);
-              const collector = pick(row, ['Collector', 'collector']);
-              const stock = pick(row, ['Stock', 'stock']);
-              const status = pick(row, ['Status', 'status']);
-
+            {displayRows.map((row, index) => {
               return (
-                <StyledTableRow key={pick(row, ['id', 'ID']) || `${serialNo}-${index}`}>
-                  <CenteredTableCell>{rowDate ? dayjs(rowDate).format('MMM D, YYYY') : '-'}</CenteredTableCell>
-                  <CenteredTableCell>{formType || '-'}</CenteredTableCell>
-                  <CenteredTableCell>{serialNo || '-'}</CenteredTableCell>
-                  <CenteredTableCell>{rangeFrom || '-'}</CenteredTableCell>
-                  <CenteredTableCell>{rangeTo || '-'}</CenteredTableCell>
-                  <CenteredTableCell>{collector || '-'}</CenteredTableCell>
-                  <CenteredTableCell>{stock || '-'}</CenteredTableCell>
-                  <CenteredTableCell>{status || '-'}</CenteredTableCell>
+                <StyledTableRow key={row.rowId || `${row.serialNo}-${index}`}>
+                  <CenteredTableCell>{row.rowDate ? dayjs(row.rowDate).format('MMM D, YYYY') : '-'}</CenteredTableCell>
+                  <CenteredTableCell>{row.formType || '-'}</CenteredTableCell>
+                  <CenteredTableCell>{row.serialNo || '-'}</CenteredTableCell>
+                  <CenteredTableCell>{row.rangeFrom !== '' ? row.rangeFrom : '-'}</CenteredTableCell>
+                  <CenteredTableCell>{row.rangeTo !== '' ? row.rangeTo : '-'}</CenteredTableCell>
+                  <CenteredTableCell>{row.collector || '-'}</CenteredTableCell>
+                  <CenteredTableCell>{row.stock !== '' ? row.stock : '-'}</CenteredTableCell>
+                  <CenteredTableCell>{row.status || '-'}</CenteredTableCell>
                   <CenteredTableCell>
                     <IconButton>
                       <VisibilityIcon color="primary" />

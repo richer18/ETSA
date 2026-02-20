@@ -1,122 +1,95 @@
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import MuiCard from "@mui/material/Card";
-import Checkbox from "@mui/material/Checkbox";
-import CssBaseline from "@mui/material/CssBaseline";
-import FormControl from "@mui/material/FormControl";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import FormLabel from "@mui/material/FormLabel";
-import Stack from "@mui/material/Stack";
-import { styled } from "@mui/material/styles";
-import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
+import React, { useState } from "react";
+import {
+  Alert,
+  Box,
+  Button,
+  Checkbox,
+  CssBaseline,
+  Fade,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  IconButton,
+  InputAdornment,
+  Paper,
+  Stack,
+  TextField,
+  ThemeProvider,
+  Typography,
+  createTheme,
+} from "@mui/material";
+import {
+  AccountBalanceOutlined,
+  LockOutlined,
+  PersonOutline,
+  ShieldOutlined,
+  Visibility,
+  VisibilityOff,
+} from "@mui/icons-material";
 import axios from "axios";
-import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import ForgotPassword from "./components/ForgotPassword";
 
-const Card = styled(MuiCard)(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  alignSelf: "center",
-  width: "100%",
-  padding: theme.spacing(4),
-  gap: theme.spacing(2),
-  margin: "auto",
-  [theme.breakpoints.up("sm")]: {
-    maxWidth: "450px",
+const lguTheme = createTheme({
+  palette: {
+    primary: {
+      main: "#1a237e",
+      light: "#534bae",
+      dark: "#000051",
+    },
+    secondary: {
+      main: "#f57f17",
+    },
+    background: {
+      default: "#f4f6f8",
+    },
   },
-  boxShadow:
-    "hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px",
-  ...theme.applyStyles("dark", {
-    boxShadow:
-      "hsla(220, 30%, 5%, 0.5) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.08) 0px 15px 35px -5px",
-  }),
-}));
+  typography: {
+    fontFamily: '"Poppins", "Segoe UI", "Roboto", "Helvetica", "Arial", sans-serif',
+    h4: {
+      fontWeight: 700,
+      letterSpacing: "-0.5px",
+    },
+  },
+  shape: {
+    borderRadius: 12,
+  },
+});
 
-const SignInContainer = styled(Stack)(({ theme }) => ({
-  height: "calc((1 - var(--template-frame-height, 0)) * 100dvh)",
-  minHeight: "100%",
-  padding: theme.spacing(2),
-  [theme.breakpoints.up("sm")]: {
-    padding: theme.spacing(4),
-  },
-  "&::before": {
-    content: '""',
-    display: "block",
-    position: "absolute",
-    zIndex: -1,
-    inset: 0,
-    backgroundImage:
-      "radial-gradient(ellipse at 50% 50%, hsl(210, 100%, 97%), hsl(0, 0%, 100%))",
-    backgroundRepeat: "no-repeat",
-    ...theme.applyStyles("dark", {
-      backgroundImage:
-        "radial-gradient(at 50% 50%, hsla(210, 100%, 16%, 0.5), hsl(220, 30%, 5%))",
-    }),
-  },
-}));
-
-export default function SignIn(props) {
-  const [usernameError, setEmailError] = React.useState(false);
-  const [usernameErrorMessage, setEmailErrorMessage] = React.useState("");
-  const [passwordError, setPasswordError] = React.useState(false);
-  const [passwordErrorMessage, setPasswordErrorMessage] = React.useState("");
-  const [open, setOpen] = React.useState(false);
+export default function SignIn() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [usernameError, setUsernameError] = useState(false);
+  const [usernameErrorMessage, setUsernameErrorMessage] = useState("");
+  const [passwordError, setPasswordError] = useState(false);
+  const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const navigate = useNavigate();
+  const handleClickShowPassword = () => setShowPassword((prev) => !prev);
 
   const handleClose = () => {
     setOpen(false);
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (!validateInputs()) return;
-
-    const data = new FormData(event.currentTarget);
-    const payload = {
-      username: data.get("username"),
-      password: data.get("password"),
-    };
-
-    try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}login`,
-        payload
-      );
-
-      alert("Login successful!");
-      console.log(response.data);
-
-      // 🚀 Redirect to /my-app dashboard
-      navigate("/my-app");
-    } catch (error) {
-      alert(
-        "Login failed: " + (error.response?.data?.message || error.message)
-      );
-      console.error(error);
-    }
-  };
-
-  const validateInputs = () => {
-    const username = document.getElementById("username")?.value.trim();
-    const password = document.getElementById("password")?.value;
-
+  const validateInputs = (formData) => {
+    const username = String(formData.get("username") || "").trim();
+    const password = String(formData.get("password") || "");
     let isValid = true;
 
     if (!username) {
-      setEmailError(true);
-      setEmailErrorMessage("Username is required.");
+      setUsernameError(true);
+      setUsernameErrorMessage("Username is required.");
       isValid = false;
     } else {
-      setEmailError(false);
-      setEmailErrorMessage("");
+      setUsernameError(false);
+      setUsernameErrorMessage("");
     }
 
     if (!password || password.length < 6) {
       setPasswordError(true);
-      setPasswordErrorMessage("Password must be at least 6 characters long.");
+      setPasswordErrorMessage("Password must be at least 6 characters.");
       isValid = false;
     } else {
       setPasswordError(false);
@@ -126,86 +99,232 @@ export default function SignIn(props) {
     return isValid;
   };
 
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    if (!validateInputs(formData)) return;
+
+    setIsLoading(true);
+    setLoginError("");
+
+    const payload = {
+      username: String(formData.get("username") || "").trim(),
+      password: String(formData.get("password") || ""),
+    };
+
+    try {
+      await axios.post(`${process.env.REACT_APP_API_URL}login`, payload);
+      navigate("/my-app");
+    } catch (error) {
+      setLoginError(error.response?.data?.message || "Invalid credentials. Please try again.");
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div>
-      <CssBaseline enableColorScheme />
-      <SignInContainer direction="column" justifyContent="space-between">
-        <Card variant="outlined">
-          <img
-            src="/assets/images/ZAMBO_LOGO_P.png"
-            alt="LGU logo"
-            width="100"
-            height="100"
-            style={{ display: "block", margin: "0 auto" }}
-          />
-          <Typography
-            component="h1"
-            variant="h4"
-            sx={{ width: "100%", fontSize: "clamp(2rem, 10vw, 2.15rem)" }}
-          >
-            Sign in
+    <ThemeProvider theme={lguTheme}>
+      <CssBaseline />
+      <Box
+        sx={{
+          display: "flex",
+          minHeight: "100vh",
+          background: "linear-gradient(130deg, #f7f9fc 0%, #d4deef 100%)",
+        }}
+      >
+        <Box
+          sx={{
+            flex: 1,
+            display: { xs: "none", md: "flex" },
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            p: 6,
+            background:
+              "linear-gradient(rgba(26,35,126,0.9), rgba(26,35,126,0.92)), url('https://images.unsplash.com/photo-1577416414929-7a4c9f1d9487?auto=format&fit=crop&q=80')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            color: "white",
+            textAlign: "center",
+          }}
+        >
+          <AccountBalanceOutlined sx={{ fontSize: 80, mb: 2, color: "secondary.main" }} />
+          <Typography variant="h3" gutterBottom sx={{ fontWeight: 700 }}>
+            Office of the Treasurer
           </Typography>
-          <Box
-            component="form"
-            onSubmit={handleSubmit}
-            noValidate
+          <Typography variant="h6" sx={{ opacity: 0.9, maxWidth: 500, fontWeight: 300 }}>
+            LGU Official Management Portal. Ensuring transparency and excellence in local fiscal
+            administration.
+          </Typography>
+          <Stack direction="row" spacing={3} sx={{ mt: 8 }}>
+            <Box sx={{ textAlign: "center" }}>
+              <ShieldOutlined sx={{ fontSize: 32, mb: 1 }} />
+              <Typography variant="caption" display="block">
+                Secure Access
+              </Typography>
+            </Box>
+            <Box sx={{ textAlign: "center" }}>
+              <LockOutlined sx={{ fontSize: 32, mb: 1 }} />
+              <Typography variant="caption" display="block">
+                Encrypted Data
+              </Typography>
+            </Box>
+          </Stack>
+        </Box>
+
+        <Box
+          sx={{
+            flex: { xs: 1, md: 0.6, lg: 0.4 },
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            p: { xs: 2, sm: 4 },
+          }}
+        >
+          <Paper
+            elevation={0}
             sx={{
-              display: "flex",
-              flexDirection: "column",
+              p: { xs: 3, sm: 6 },
               width: "100%",
-              gap: 2,
+              maxWidth: 450,
+              borderRadius: 4,
+              boxShadow: "0 10px 40px rgba(0,0,0,0.1)",
+              backgroundColor: "rgba(255,255,255,0.95)",
+              backdropFilter: "blur(10px)",
             }}
           >
-            <FormControl>
-              <FormLabel htmlFor="username">Username</FormLabel>
-              <TextField
-                error={usernameError}
-                helperText={usernameErrorMessage}
-                id="username"
-                type="text" // ✅ Use "text" instead of "email"
-                name="username" // ✅ Update name
-                placeholder="Enter your username"
-                autoComplete="username" // Optional: for browser autofill
-                autoFocus
-                required
-                fullWidth
-                variant="outlined"
-                color={usernameError ? "error" : "primary"}
+            <Box sx={{ textAlign: "center", mb: 4 }}>
+              <Box
+                component="img"
+                src="/assets/images/ZAMBO_LOGO_P.png"
+                alt="LGU Logo"
+                sx={{
+                  width: 100,
+                  height: 100,
+                  mb: 2,
+                  filter: "drop-shadow(0 4px 4px rgba(0,0,0,0.1))",
+                }}
               />
-            </FormControl>
-            <FormControl>
-              <FormLabel htmlFor="password">Password</FormLabel>
-              <TextField
-                error={passwordError}
-                helperText={passwordErrorMessage}
-                name="password"
-                placeholder="••••••"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-                autoFocus
-                required
-                fullWidth
-                variant="outlined"
-                color={passwordError ? "error" : "primary"}
-              />
-            </FormControl>
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
-            />
-            <ForgotPassword open={open} handleClose={handleClose} />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              onClick={validateInputs}
-            >
-              Sign in
-            </Button>
-          </Box>
-        </Card>
-      </SignInContainer>
-    </div>
+              <Typography variant="h4" color="primary" gutterBottom>
+                Staff Login
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Please enter your credentials to access the system.
+              </Typography>
+            </Box>
+
+            {loginError && (
+              <Fade in={Boolean(loginError)}>
+                <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+                  {loginError}
+                </Alert>
+              </Fade>
+            )}
+
+            <Box component="form" onSubmit={handleSubmit} noValidate>
+              <Stack spacing={2.5}>
+                <FormControl fullWidth>
+                  <FormLabel htmlFor="username" sx={{ mb: 1, fontWeight: 600, fontSize: "0.85rem" }}>
+                    Username
+                  </FormLabel>
+                  <TextField
+                    id="username"
+                    name="username"
+                    placeholder="e.g. jdoe_treasury"
+                    autoComplete="username"
+                    autoFocus
+                    variant="outlined"
+                    error={usernameError}
+                    helperText={usernameErrorMessage}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <PersonOutline color={usernameError ? "error" : "action"} />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </FormControl>
+
+                <FormControl fullWidth>
+                  <FormLabel htmlFor="password" sx={{ mb: 1, fontWeight: 600, fontSize: "0.85rem" }}>
+                    Password
+                  </FormLabel>
+                  <TextField
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    autoComplete="current-password"
+                    variant="outlined"
+                    error={passwordError}
+                    helperText={passwordErrorMessage}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <LockOutlined color={passwordError ? "error" : "action"} />
+                        </InputAdornment>
+                      ),
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton aria-label="toggle password visibility" onClick={handleClickShowPassword} edge="end">
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </FormControl>
+
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <FormControlLabel
+                    control={<Checkbox value="remember" color="primary" size="small" />}
+                    label={<Typography variant="body2">Keep me logged in</Typography>}
+                  />
+                  <Button
+                    variant="text"
+                    size="small"
+                    onClick={() => setOpen(true)}
+                    sx={{ textTransform: "none", fontWeight: 600 }}
+                  >
+                    Forgot Password?
+                  </Button>
+                </Box>
+
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  size="large"
+                  disabled={isLoading}
+                  sx={{
+                    py: 1.5,
+                    fontSize: "1rem",
+                    fontWeight: "bold",
+                    boxShadow: "0 4px 12px rgba(26,35,126,0.3)",
+                    "&:hover": {
+                      boxShadow: "0 6px 16px rgba(26,35,126,0.4)",
+                    },
+                  }}
+                >
+                  {isLoading ? "Authenticating..." : "Sign In to Portal"}
+                </Button>
+              </Stack>
+            </Box>
+
+            <Box sx={{ mt: 4, textAlign: "center" }}>
+              <Typography variant="caption" color="text.secondary">
+                © {new Date().getFullYear()} Municipal Government Revenue System
+                <br />
+                Security Level: High (Internal Access Only)
+              </Typography>
+            </Box>
+          </Paper>
+        </Box>
+      </Box>
+      <ForgotPassword open={open} handleClose={handleClose} />
+    </ThemeProvider>
   );
 }

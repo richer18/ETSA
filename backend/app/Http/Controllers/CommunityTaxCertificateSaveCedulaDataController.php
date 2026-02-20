@@ -15,8 +15,11 @@ class CommunityTaxCertificateSaveCedulaDataController extends Controller
         $CTCNO = $request->input('CTCNO');
         $CTCTYPE = $request->input('CTCTYPE');
         $OWNERNAME = $request->input('OWNERNAME');
+        $LOCAL_TIN = $request->input('LOCAL_TIN');
         $BASICTAXDUE = $request->input('BASICTAXDUE');
+        $BUSTAXDUE = $request->input('BUSTAXDUE');
         $SALTAXDUE = $request->input('SALTAXDUE');
+        $RPTAXDUE = $request->input('RPTAXDUE');
         $INTEREST = $request->input('INTEREST');
         $TOTALAMOUNTPAID = $request->input('TOTALAMOUNTPAID');
         $USERID = $request->input('USERID');
@@ -40,13 +43,16 @@ class CommunityTaxCertificateSaveCedulaDataController extends Controller
                     CTCNO,
                     CTCTYPE,
                     OWNERNAME,
+                    LOCAL_TIN,
                     BASICTAXDUE,
+                    BUSTAXDUE,
                     SALTAXDUE,
+                    RPTAXDUE,
                     INTEREST,
                     TOTALAMOUNTPAID,
                     USERID,
                     CTCYEAR
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ";
 
             DB::insert($sql, [
@@ -55,8 +61,11 @@ class CommunityTaxCertificateSaveCedulaDataController extends Controller
                 $CTCNO,
                 $CTCTYPE,
                 $OWNERNAME,
+                $LOCAL_TIN,
                 $BASICTAXDUE,
+                $BUSTAXDUE,
                 $SALTAXDUE,
+                $RPTAXDUE,
                 $INTEREST,
                 $TOTALAMOUNTPAID,
                 $USERID,

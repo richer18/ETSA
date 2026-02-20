@@ -10,10 +10,13 @@ function PopupDialog({ onClose, children }) {
     <Dialog
       open={true}
       onClose={onClose}
-      maxWidth="md" // Adjust dialog width
-      fullWidth // Make it take full width
+      maxWidth={false}
+      fullWidth
       PaperProps={{
         sx: {
+          width: "min(98vw, 1220px)",
+          maxWidth: "1220px",
+          margin: { xs: 1, sm: 2 },
           backgroundColor: "#f5f5f5", // Light gray background
           color: "#333", // Dark text color
           borderRadius: "12px", // Rounded corners
@@ -39,7 +42,14 @@ function PopupDialog({ onClose, children }) {
         </Button>
       </DialogTitle>
 
-      <DialogContent sx={{ padding: "20px 24px" }}>{children}</DialogContent>
+      <DialogContent
+        sx={{
+          p: { xs: 1, sm: 2 },
+          overflowX: "auto",
+        }}
+      >
+        {children}
+      </DialogContent>
       
     </Dialog>
   );

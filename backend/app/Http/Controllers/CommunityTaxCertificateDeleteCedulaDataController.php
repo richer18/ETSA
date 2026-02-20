@@ -16,6 +16,7 @@ class CommunityTaxCertificateDeleteCedulaDataController extends Controller
         try {
             $deleted = DB::table('cedula')
                 ->where('CTC_ID', $id)
+                ->orWhere('CTCNO', $id)
                 ->delete();
 
             if ($deleted === 0) {

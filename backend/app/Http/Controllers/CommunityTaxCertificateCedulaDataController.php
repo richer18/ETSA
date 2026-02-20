@@ -12,24 +12,27 @@ class CommunityTaxCertificateCedulaDataController extends Controller
         try {
             $results = DB::select("
                 SELECT
+                    CTC_ID AS CTC_ID,
                     DATEISSUED AS DATE,
                     CTCNO AS `CTC NO`,
                     LOCAL_TIN AS LOCAL,
                     OWNERNAME AS NAME,
-                    BASICTAXDUE AS BASIC,
-                    BUSTAXAMOUNT AS BUSTAXAMOUNT,
-                    BUSTAXDUE AS BUSTAXDUE,
-                    SALTAXAMOUNT AS SALTAXAMOUNT,
-                    SALTAXDUE AS SALTAXDUE,
-                    RPTAXAMOUNT AS RPTAXAMOUNT,
-                    RPTAXDUE AS RPTAXDUE,
-                    (BUSTAXDUE + SALTAXDUE + RPTAXDUE) AS TAX_DUE,
-                    INTEREST AS INTEREST,
-                    (BASICTAXDUE + BUSTAXDUE + SALTAXDUE + RPTAXDUE + INTEREST) AS TOTALAMOUNTPAID,
+                    COALESCE(BASICTAXDUE, 0) AS BASIC,
+                    COALESCE(BUSTAXDUE, 0) AS BUSTAXDUE,
+                    COALESCE(SALTAXDUE, 0) AS SALTAXDUE,
+                    COALESCE(RPTAXDUE, 0) AS RPTAXDUE,
+                    (
+                        COALESCE(BUSTAXDUE, 0) +
+                        COALESCE(SALTAXDUE, 0) +
+                        COALESCE(RPTAXDUE, 0)
+                    ) AS TAX_DUE,
+                    COALESCE(INTEREST, 0) AS INTEREST,
+                    COALESCE(TOTALAMOUNTPAID, 0) AS TOTALAMOUNTPAID,
                     USERID AS CASHIER,
-                    COMMENT AS COMMENTS
+                    COMMENT AS COMMENT
                 FROM
                     cedula
+                ORDER BY DATEISSUED DESC, CTC_ID DESC
             ");
 
             return response()->json($results);

@@ -1,197 +1,160 @@
 import {
   Box,
   Button,
+  Divider,
   FormControl,
+  InputAdornment,
   InputLabel,
   MenuItem,
+  Paper,
   Select,
   TextField,
   Typography,
 } from "@mui/material";
-import { styled } from "@mui/system";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import dayjs from "dayjs";
 import PropTypes from "prop-types";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import axiosInstance from "../../../api/axiosInstance";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
 
-// Styled Components
-const Root = styled(Box)({
-  padding: "30px",
-  // backgroundColor: 'white',
-  borderRadius: "8px",
-  // boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-  maxWidth: "600px",
-  margin: "20px auto",
-});
+const cashierOptions = ["flora", "angelique", "ricardo", "agnes"];
+const basicCommunityTax = 5.0;
 
-const InputField = styled(TextField)(({ theme }) => ({
-  margin: `${theme.spacing(2)} 0`,
-  "& .MuiInputBase-root": {
-    borderRadius: "8px",
-  },
-}));
+const toNumber = (value) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
 
-const ButtonContainer = styled(Box)({
-  display: "flex",
-  justifyContent: "space-between",
-  marginTop: "20px",
-});
+const stepCircleSx = {
+  width: 32,
+  height: 32,
+  borderRadius: "50%",
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  backgroundColor: "#0080A7",
+  color: "#fff",
+  fontWeight: 700,
+  mr: 1.5,
+};
 
-const CustomButton = styled(Button)(({ variant }) => ({
-  fontSize: "0.9rem",
-  borderRadius: "8px",
-  padding: "8px 16px",
-  ...(variant === "outlined" && {
-    color: "#555",
-    borderColor: "#ccc",
-  }),
-  ...(variant === "contained" && {
-    color: "white",
-    backgroundColor: "#007bff",
-    "&:hover": {
-      backgroundColor: "#0056b3",
-    },
-  }),
-}));
+const roundedFieldSx = {
+  "& .MuiOutlinedInput-root": { borderRadius: "12px" },
+};
 
-// Options for cashier dropdown
-const cashierOptions = [
-  "Please select",
-  "flora",
-  "angelique",
-  "ricardo",
-  "agnes",
-];
+function Cedula({ data, mode, onSaved, onClose }) {
+  const [selectedDate, setSelectedDate] = useState("");
+  const [originalReceipt, setOriginalReceipt] = useState("");
+  const [savingInProgress, setSavingInProgress] = useState(false);
 
-function Cedula({ data, mode }) {
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [interest, setInterest] = useState("");
-  const [total, setTotal] = useState(0);
-  const [selectedCashier, setSelectedCashier] = useState("");
   const [formData, setFormData] = useState({
     receipt: "",
-    taxpayerName: "",
-    taxToPay: "",
+    localTin: "",
+    fullName: "",
+    ctcYear: dayjs().year(),
+    businessGrossReceipts: "",
+    salariesProfessionEarnings: "",
+    realPropertyIncome: "",
+    interest: "",
     userid: "",
   });
 
-  const [savingInProgress, setSavingInProgress] = useState(false);
-
-  const basicCommunityTax = 5.0;
-
-  // Map data to form fields
-  const mapDataToForm = (data) => ({
-    receipt: data?.["CTC NO"] || data?.CTCNO || "",
-    taxpayerName: data?.["NAME"] || data?.OWNERNAME || "",
-    taxToPay: data?.["TAX_DUE"] || data?.SALTAXDUE || "",
-    userid: data?.["CASHIER"] || data?.CASHIER || "",
-    ctcId: data?.["CTC_ID"] || data?.id || "", // Map the CTC_ID properly
-  });
-
-  // Populate form fields when editing
   useEffect(() => {
-    if (data) {
-      const mappedData = mapDataToForm(data);
+    if (!data) return;
 
-      setFormData(mappedData);
-      setSelectedDate(data.DATE ? dayjs(data.DATE) : null);
-      setInterest(data.INTEREST || "");
-      setTotal(data.TOTALAMOUNTPAID || 0);
-      setSelectedCashier(data.CASHIER || "");
-    }
+    const mappedReceipt = String(data?.["CTC NO"] ?? data?.CTCNO ?? "");
+    const mappedDate = data?.DATE ?? data?.DATEISSUED ?? "";
+    const mappedYear = Number(
+      data?.CTCYEAR ?? (mappedDate ? dayjs(mappedDate).year() : dayjs().year())
+    );
+
+    setOriginalReceipt(mappedReceipt);
+    setSelectedDate(mappedDate ? dayjs(mappedDate).format("YYYY-MM-DD") : "");
+    setFormData({
+      receipt: mappedReceipt,
+      localTin: String(data?.LOCAL ?? data?.LOCAL_TIN ?? ""),
+      fullName: String(data?.NAME ?? data?.OWNERNAME ?? ""),
+      ctcYear: Number.isFinite(mappedYear) ? mappedYear : dayjs().year(),
+      businessGrossReceipts: String(data?.BUSTAXDUE ?? data?.TAX_DUE ?? ""),
+      salariesProfessionEarnings: String(data?.SALTAXDUE ?? 0),
+      realPropertyIncome: String(data?.RPTAXDUE ?? 0),
+      interest: String(data?.INTEREST ?? ""),
+      userid: String(data?.CASHIER ?? data?.USERID ?? ""),
+    });
   }, [data]);
 
-  // Calculate interest based on tax to pay and date
-  useEffect(() => {
-    if (selectedDate) {
-      const month = selectedDate.month() + 1; // Get month (1-12)
-      const baseMonth = 3; // Interest starts in March
-      const baseRate = 0.06; // 6% for March
-      const incrementRate = 0.02; // 2% increase per month
-
-      let interestRate = 0.0;
-
-      // Apply interest if the month is March (3) or later
-      if (month >= baseMonth) {
-        interestRate = baseRate + incrementRate * (month - baseMonth);
-      }
-
-      // Parse taxToPay (default to 0 if empty)
-      const taxAmount = parseFloat(formData.taxToPay || 0);
-
-      // Updated interest calculation: (Basic + TaxToPay) * InterestRate
-      const calculatedInterest = (basicCommunityTax + taxAmount) * interestRate;
-
-      setInterest(calculatedInterest.toFixed(2));
-
-      // Updated total calculation: Basic + TaxToPay + Interest
-      const totalValue = basicCommunityTax + taxAmount + calculatedInterest;
-      setTotal(totalValue.toFixed(2));
-    }
-  }, [selectedDate, formData.taxToPay]);
-
-  // Calculate total amount
-  useEffect(() => {
-    const totalValue =
-      basicCommunityTax +
-      parseFloat(formData.taxToPay || 0) +
-      (parseFloat(interest) || 0);
-    setTotal(totalValue.toFixed(2));
-  }, [formData.taxToPay, interest]);
+  const totals = useMemo(() => {
+    const business = toNumber(formData.businessGrossReceipts);
+    const salaries = toNumber(formData.salariesProfessionEarnings);
+    const realProperty = toNumber(formData.realPropertyIncome);
+    const interest = toNumber(formData.interest);
+    const total = basicCommunityTax + business + salaries + realProperty + interest;
+    return { business, salaries, realProperty, interest, total };
+  }, [
+    formData.businessGrossReceipts,
+    formData.salariesProfessionEarnings,
+    formData.realPropertyIncome,
+    formData.interest,
+  ]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (name === "userid") setSelectedCashier(value);
   };
 
-  useEffect(() => {}, [mode]);
-
-  useEffect(() => {}, [formData]);
+  const handleReset = () => {
+    setFormData({
+      receipt: "",
+      localTin: "",
+      fullName: "",
+      ctcYear: dayjs().year(),
+      businessGrossReceipts: "",
+      salariesProfessionEarnings: "",
+      realPropertyIncome: "",
+      interest: "",
+      userid: "",
+    });
+    setSelectedDate("");
+  };
 
   const handleSave = async () => {
-    if (!formData.receipt || savingInProgress) return;
+    if (!formData.receipt || !selectedDate || savingInProgress) return;
 
     setSavingInProgress(true);
-
     const now = new Date();
-    const formatDateTime = (date) =>
-      date.toISOString().slice(0, 19).replace("T", " "); // MySQL DATETIME format
+    const formatDateTime = (date) => date.toISOString().slice(0, 19).replace("T", " ");
 
-    const dataToSave = {
-      DATEISSUED: selectedDate ? selectedDate.format("YYYY-MM-DD") : null,
-      TRANSDATE: formatDateTime(now), // Now also MySQL friendly
+    const payload = {
+      DATEISSUED: selectedDate,
+      TRANSDATE: formatDateTime(now),
       CTCNO: formData.receipt,
       CTCTYPE: "CTCI",
-      OWNERNAME: formData.taxpayerName,
-      BASICTAXDUE: parseFloat(basicCommunityTax),
-      SALTAXDUE: parseFloat(formData.taxToPay),
-      INTEREST: parseFloat(interest),
-      TOTALAMOUNTPAID: parseFloat(total),
+      OWNERNAME: formData.fullName,
+      LOCAL_TIN: formData.localTin,
+      BASICTAXDUE: basicCommunityTax,
+      BUSTAXDUE: totals.business,
+      SALTAXDUE: totals.salaries,
+      RPTAXDUE: totals.realProperty,
+      INTEREST: totals.interest,
+      TOTALAMOUNTPAID: totals.total,
       USERID: formData.userid,
-      CTCYEAR: now.getFullYear(),
-      DATALASTEDITED: formatDateTime(now), // Now works with DATETIME column
+      CTCYEAR: toNumber(formData.ctcYear) || dayjs().year(),
+      DATALASTEDITED: formatDateTime(now),
     };
 
     const isEditMode = mode === "edit";
+    const updateKey = originalReceipt || formData.receipt;
     const url = isEditMode
-      ? `updateCedulaData/${formData.receipt}`
+      ? `updateCedulaData/${encodeURIComponent(updateKey)}`
       : "saveCedulaData";
 
     try {
-      await axiosInstance[isEditMode ? "put" : "post"](url, dataToSave);
-
-      alert(
-        isEditMode ? "Data updated successfully" : "Data saved successfully"
-      );
-      handleReset();
-
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+      await axiosInstance[isEditMode ? "put" : "post"](url, payload);
+      alert(isEditMode ? "Data updated successfully" : "Data saved successfully");
+      if (typeof onSaved === "function") await onSaved();
+      if (typeof onClose === "function") onClose();
+      if (!isEditMode) handleReset();
     } catch (error) {
       console.error("Error during save:", error);
       alert("An error occurred while saving. Please try again.");
@@ -200,96 +163,344 @@ function Cedula({ data, mode }) {
     }
   };
 
-  const handleReset = () => {
-    setFormData({
-      receipt: "",
-      taxpayerName: "",
-      taxToPay: "",
-      userid: "",
-    });
-    setSelectedDate(null);
-    setInterest("");
-    setTotal(0);
-  };
+  const calculateTotal = () => totals.total.toFixed(2);
 
   return (
-    <Root>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <DatePicker
-          label="Date Issued"
-          value={selectedDate}
-          onChange={setSelectedDate}
-          slotProps={{
-            textField: { fullWidth: true, variant: "outlined" },
-          }}
-        />
-      </LocalizationProvider>
+    <Box sx={{ maxWidth: 1220, mx: "auto", p: { xs: 1, md: 2 } }}>
+      <Row className="g-3">
+        <Col xs={12} lg={8}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: { xs: 2, md: 2.5 },
+              borderRadius: "16px",
+              border: "1px solid #d8e2ee",
+              backgroundColor: "#f8fbff",
+              mb: 2,
+            }}
+          >
+            <Box display="flex" alignItems="center" mb={2}>
+              <Box sx={stepCircleSx}>1</Box>
+              <Typography variant="h6" fontWeight={700} color="#16324f">
+                Cedula Information
+              </Typography>
+            </Box>
+            <Row className="g-2">
+              <Col xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  type="date"
+                  label="Date Issued"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  InputLabelProps={{ shrink: true }}
+                  variant="outlined"
+                  sx={roundedFieldSx}
+                />
+              </Col>
+              <Col xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="CTC No."
+                  name="receipt"
+                  value={formData.receipt}
+                  onChange={handleChange}
+                  variant="outlined"
+                  sx={roundedFieldSx}
+                />
+              </Col>
+              <Col xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Local TIN"
+                  name="localTin"
+                  value={formData.localTin}
+                  onChange={handleChange}
+                  variant="outlined"
+                  sx={roundedFieldSx}
+                />
+              </Col>
+              <Col xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel id="tax-year-label">CTC Year</InputLabel>
+                  <Select
+                    labelId="tax-year-label"
+                    label="CTC Year"
+                    name="ctcYear"
+                    value={formData.ctcYear}
+                    onChange={handleChange}
+                    sx={{ borderRadius: "12px" }}
+                  >
+                    {[2024, 2025, 2026, 2027, 2028].map((y) => (
+                      <MenuItem key={y} value={y}>
+                        {y}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Col>
+              <Col xs={12}>
+                <TextField
+                  fullWidth
+                  label="Full Name"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  variant="outlined"
+                  sx={roundedFieldSx}
+                />
+              </Col>
+            </Row>
+          </Paper>
 
-      <InputField
-        name="receipt"
-        label="Community Tax Certificate Number"
-        variant="outlined"
-        fullWidth
-        value={formData.receipt}
-        onChange={handleChange}
-      />
+          <Paper
+            elevation={0}
+            sx={{
+              p: { xs: 2, md: 2.5 },
+              borderRadius: "16px",
+              border: "1px solid #d8e2ee",
+              backgroundColor: "#ffffff",
+            }}
+          >
+            <Box display="flex" alignItems="center" mb={2}>
+              <Box sx={stepCircleSx}>2</Box>
+              <Typography variant="h6" fontWeight={700} color="#16324f">
+                Tax Breakdown
+              </Typography>
+            </Box>
 
-      <InputField
-        name="taxpayerName"
-        label="Name of Taxpayer"
-        variant="outlined"
-        fullWidth
-        value={formData.taxpayerName}
-        onChange={handleChange}
-      />
+            <Row className="g-2 align-items-center">
+              <Col xs={12} md={8}>
+                <Typography sx={{ color: "#2b3c54", fontWeight: 600 }}>
+                  Basic Community Tax
+                </Typography>
+              </Col>
+              <Col xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  value={basicCommunityTax.toFixed(2)}
+                  InputProps={{ readOnly: true, startAdornment: <InputAdornment position="start">PHP</InputAdornment> }}
+                  sx={roundedFieldSx}
+                />
+              </Col>
 
-      <Typography sx={{ color: "black" }}>
-        Basic Tax Due: {basicCommunityTax.toFixed(2)}
-      </Typography>
+              <Col xs={12} md={8}>
+                <Typography sx={{ color: "#2b3c54", fontWeight: 600 }}>
+                  Business Gross Receipts
+                </Typography>
+              </Col>
+              <Col xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  type="number"
+                  name="businessGrossReceipts"
+                  value={formData.businessGrossReceipts}
+                  onChange={handleChange}
+                  InputProps={{ startAdornment: <InputAdornment position="start">PHP</InputAdornment> }}
+                  sx={roundedFieldSx}
+                />
+              </Col>
 
-      <InputField
-        name="taxToPay"
-        label="Tax to Pay"
-        type="number"
-        variant="outlined"
-        fullWidth
-        value={formData.taxToPay}
-        onChange={handleChange}
-      />
+              <Col xs={12} md={8}>
+                <Typography sx={{ color: "#2b3c54", fontWeight: 600 }}>
+                  Salaries / Profession Earnings
+                </Typography>
+              </Col>
+              <Col xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  type="number"
+                  name="salariesProfessionEarnings"
+                  value={formData.salariesProfessionEarnings}
+                  onChange={handleChange}
+                  InputProps={{ startAdornment: <InputAdornment position="start">PHP</InputAdornment> }}
+                  sx={roundedFieldSx}
+                />
+              </Col>
 
-      <FormControl fullWidth>
-        <InputLabel>Select Cashier</InputLabel>
-        <Select
-          name="userid"
-          value={selectedCashier} // Use the `userid` field
-          onChange={(e) => {
-            setSelectedCashier(e.target.value);
-            setFormData((prev) => ({ ...prev, userid: e.target.value })); // Update `userid` in `formData`
-          }}
-          label="Select Cashier"
-        >
-          {cashierOptions.map((cashier) => (
-            <MenuItem key={cashier} value={cashier}>
-              {cashier}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+              <Col xs={12} md={8}>
+                <Typography sx={{ color: "#2b3c54", fontWeight: 600 }}>
+                  Real Property Income
+                </Typography>
+              </Col>
+              <Col xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  type="number"
+                  name="realPropertyIncome"
+                  value={formData.realPropertyIncome}
+                  onChange={handleChange}
+                  InputProps={{ startAdornment: <InputAdornment position="start">PHP</InputAdornment> }}
+                  sx={roundedFieldSx}
+                />
+              </Col>
 
-      <Typography sx={{ color: "black" }}>Interest: {interest}</Typography>
-      <Typography sx={{ color: "black" }}>
-        Total Amount Paid: {total}
-      </Typography>
+              <Col xs={12} md={8}>
+                <Typography sx={{ color: "#2b3c54", fontWeight: 600 }}>
+                  Interest
+                </Typography>
+              </Col>
+              <Col xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  type="number"
+                  name="interest"
+                  value={formData.interest}
+                  onChange={handleChange}
+                  InputProps={{ startAdornment: <InputAdornment position="start">PHP</InputAdornment> }}
+                  sx={roundedFieldSx}
+                />
+              </Col>
 
-      <ButtonContainer>
-        <CustomButton variant="outlined" onClick={handleReset}>
-          RESET
-        </CustomButton>
-        <CustomButton variant="contained" onClick={handleSave}>
-          SAVE
-        </CustomButton>
-      </ButtonContainer>
-    </Root>
+              <Col xs={12}>
+                <Divider sx={{ my: 1 }} />
+              </Col>
+
+              <Col xs={12} md={8}>
+                <Typography sx={{ color: "#0c2e4d", fontWeight: 800 }}>
+                  Total Amount Paid
+                </Typography>
+              </Col>
+              <Col xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  value={calculateTotal()}
+                  InputProps={{ readOnly: true, startAdornment: <InputAdornment position="start">PHP</InputAdornment> }}
+                  sx={roundedFieldSx}
+                />
+              </Col>
+
+              <Col xs={12} md={8}>
+                <Typography sx={{ color: "#2b3c54", fontWeight: 600 }}>
+                  Cashier
+                </Typography>
+              </Col>
+              <Col xs={12} md={4}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="cashier-label">Select Cashier</InputLabel>
+                  <Select
+                    labelId="cashier-label"
+                    name="userid"
+                    label="Select Cashier"
+                    value={formData.userid}
+                    onChange={handleChange}
+                    sx={{ borderRadius: "12px" }}
+                  >
+                    <MenuItem value="">
+                      <em>Assign Later</em>
+                    </MenuItem>
+                    {cashierOptions.map((cashier) => (
+                      <MenuItem key={cashier} value={cashier}>
+                        {cashier.toUpperCase()}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Col>
+            </Row>
+
+            <Row className="g-2 mt-2">
+              <Col xs={12} sm={6}>
+                <Button fullWidth variant="outlined" onClick={handleReset}>
+                  RESET
+                </Button>
+              </Col>
+              <Col xs={12} sm={6}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  onClick={handleSave}
+                  disabled={savingInProgress}
+                  sx={{ fontWeight: 700 }}
+                >
+                  {savingInProgress ? "SAVING..." : "SAVE"}
+                </Button>
+              </Col>
+            </Row>
+          </Paper>
+        </Col>
+
+        <Col xs={12} lg={4}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 2.5,
+              borderRadius: "16px",
+              border: "1px solid #d8e2ee",
+              background: "linear-gradient(160deg, #f5f9ff 0%, #edf5ff 100%)",
+            }}
+          >
+            <Typography variant="overline" sx={{ letterSpacing: 1.6, color: "#50647c" }}>
+              Quick Summary
+            </Typography>
+            <Typography variant="h5" fontWeight={800} color="#0d2e4f" sx={{ mb: 0.5 }}>
+              PHP {calculateTotal()}
+            </Typography>
+            <Typography variant="body2" color="#5b7088" sx={{ mb: 2 }}>
+              Current total assessment
+            </Typography>
+
+            <Divider sx={{ mb: 2 }} />
+
+            <Row className="g-2">
+              <Col xs={7}>
+                <Typography variant="body2" color="#4c6078">Basic</Typography>
+              </Col>
+              <Col xs={5}>
+                <Typography variant="body2" textAlign="right" fontWeight={600}>
+                  PHP {basicCommunityTax.toFixed(2)}
+                </Typography>
+              </Col>
+
+              <Col xs={7}>
+                <Typography variant="body2" color="#4c6078">Business</Typography>
+              </Col>
+              <Col xs={5}>
+                <Typography variant="body2" textAlign="right" fontWeight={600}>
+                  PHP {totals.business.toFixed(2)}
+                </Typography>
+              </Col>
+
+              <Col xs={7}>
+                <Typography variant="body2" color="#4c6078">Salaries</Typography>
+              </Col>
+              <Col xs={5}>
+                <Typography variant="body2" textAlign="right" fontWeight={600}>
+                  PHP {totals.salaries.toFixed(2)}
+                </Typography>
+              </Col>
+
+              <Col xs={7}>
+                <Typography variant="body2" color="#4c6078">Real Property</Typography>
+              </Col>
+              <Col xs={5}>
+                <Typography variant="body2" textAlign="right" fontWeight={600}>
+                  PHP {totals.realProperty.toFixed(2)}
+                </Typography>
+              </Col>
+
+              <Col xs={7}>
+                <Typography variant="body2" color="#4c6078">Interest</Typography>
+              </Col>
+              <Col xs={5}>
+                <Typography variant="body2" textAlign="right" fontWeight={600}>
+                  PHP {totals.interest.toFixed(2)}
+                </Typography>
+              </Col>
+            </Row>
+
+            <Button
+              fullWidth
+              variant="text"
+              onClick={onClose}
+              sx={{ mt: 2, textTransform: "none" }}
+            >
+              Close Form
+            </Button>
+          </Paper>
+        </Col>
+      </Row>
+    </Box>
   );
 }
 
@@ -298,14 +509,18 @@ Cedula.propTypes = {
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     CTCNO: PropTypes.string,
     OWNERNAME: PropTypes.string,
+    LOCAL_TIN: PropTypes.string,
+    CTCYEAR: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    BUSTAXDUE: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     SALTAXDUE: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    USERID: PropTypes.string,
-    DATEISSUED: PropTypes.string,
+    RPTAXDUE: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     INTEREST: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     TOTALAMOUNTPAID: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    CASHIER: PropTypes.string,
+    USERID: PropTypes.string,
   }),
   mode: PropTypes.string,
+  onSaved: PropTypes.func,
+  onClose: PropTypes.func,
 };
 
 export default Cedula;
