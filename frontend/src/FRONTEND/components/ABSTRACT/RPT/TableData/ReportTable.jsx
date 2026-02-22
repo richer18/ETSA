@@ -428,8 +428,11 @@ function ReportTable({ onBack }) {
           mb: 4,
           p: 3,
           bgcolor: "background.paper",
-          borderRadius: 2,
-          boxShadow: 1,
+          borderRadius: 3,
+          border: "1px solid #d6a12b",
+          boxShadow: "0 8px 20px rgba(15, 23, 42, 0.08)",
+          gap: 2,
+          flexWrap: "wrap",
         }}
       >
         <Button
@@ -439,14 +442,19 @@ function ReportTable({ onBack }) {
           sx={{
             borderRadius: "8px",
             textTransform: "none",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-            "&:hover": { boxShadow: "0 4px 8px rgba(0,0,0,0.15)" },
+            fontWeight: 700,
+            backgroundColor: "#0f2747",
+            boxShadow: "0 4px 10px rgba(15, 39, 71, 0.25)",
+            "&:hover": {
+              backgroundColor: "#0b1e38",
+              boxShadow: "0 6px 14px rgba(15, 39, 71, 0.35)",
+            },
           }}
         >
           Back
         </Button>
 
-        <Box display="flex" gap={2}>
+        <Box display="flex" gap={2} flexWrap="wrap">
           <Autocomplete
             disablePortal
             id="month-selector"
@@ -458,7 +466,31 @@ function ReportTable({ onBack }) {
             onChange={handleMonthChange}
             value={month}
             renderInput={(params) => (
-              <TextField {...params} label="Select Month" variant="outlined" />
+              <TextField
+                {...params}
+                label="Select Month"
+                variant="outlined"
+                sx={{
+                  "& .MuiInputBase-input": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.divider,
+                  },
+                  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.primary,
+                  },
+                }}
+              />
             )}
           />
           <Autocomplete
@@ -472,7 +504,31 @@ function ReportTable({ onBack }) {
             onChange={handleYearChange}
             value={year}
             renderInput={(params) => (
-              <TextField {...params} label="Select Year" variant="outlined" />
+              <TextField
+                {...params}
+                label="Select Year"
+                variant="outlined"
+                sx={{
+                  "& .MuiInputBase-input": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.divider,
+                  },
+                  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.primary,
+                  },
+                }}
+              />
             )}
           />
         </Box>
@@ -2542,6 +2598,13 @@ function ReportTable({ onBack }) {
         justifyContent="space-between"
         flexWrap="wrap"
         gap={2}
+        sx={{
+          p: 3,
+          borderRadius: 3,
+          border: "1px solid #d6a12b",
+          bgcolor: "background.paper",
+          boxShadow: "0 8px 20px rgba(15, 23, 42, 0.08)",
+        }}
       >
         <Button
           variant="contained"
@@ -2549,41 +2612,44 @@ function ReportTable({ onBack }) {
           className="print-button"
           startIcon={<PrintIcon />}
           sx={{
-            px: 3,
-            py: 1.25,
-            fontWeight: 500,
-            fontSize: "0.95rem",
-            borderRadius: "12px",
-            background: "linear-gradient(135deg, #3f51b5, #5c6bc0)",
+            px: 3.25,
+            py: 1.15,
+            fontWeight: 700,
+            fontSize: "0.9rem",
+            borderRadius: "10px",
+            backgroundColor: "#0f2747",
             color: "#fff",
-            boxShadow: "0 4px 20px rgba(63,81,181,0.2)",
-            transition: "all 0.3s ease",
+            boxShadow: "0 4px 10px rgba(15, 39, 71, 0.25)",
+            textTransform: "none",
+            transition: "all 0.2s ease",
             "&:hover": {
-              background: "linear-gradient(135deg, #5c6bc0, #7986cb)",
-              boxShadow: "0 6px 30px rgba(63,81,181,0.3)",
+              backgroundColor: "#0b1e38",
+              boxShadow: "0 6px 14px rgba(15, 39, 71, 0.35)",
+              transform: "translateY(-1px)",
             },
           }}
         >
-          Print
+          Print PDF
         </Button>
 
         <Button
-          variant="contained"
+          variant="outlined"
           onClick={handleDownloadExcel}
           startIcon={<FileDownloadIcon />}
           sx={{
-            px: 3,
-            py: 1.25,
-            fontWeight: 500,
-            fontSize: "0.95rem",
-            borderRadius: "12px",
-            background: "linear-gradient(135deg, #388e3c, #66bb6a)",
-            color: "#fff",
-            boxShadow: "0 4px 20px rgba(56, 142, 60, 0.2)",
-            transition: "all 0.3s ease",
+            px: 3.25,
+            py: 1.15,
+            fontWeight: 700,
+            fontSize: "0.9rem",
+            borderRadius: "10px",
+            borderColor: "#0f2747",
+            color: "#0f2747",
+            textTransform: "none",
+            transition: "all 0.2s ease",
             "&:hover": {
-              background: "linear-gradient(135deg, #66bb6a, #81c784)",
-              boxShadow: "0 6px 30px rgba(56, 142, 60, 0.3)",
+              borderColor: "#0b1e38",
+              backgroundColor: "rgba(15, 39, 71, 0.08)",
+              transform: "translateY(-1px)",
             },
           }}
         >

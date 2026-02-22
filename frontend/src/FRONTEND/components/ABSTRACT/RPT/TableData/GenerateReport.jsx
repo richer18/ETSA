@@ -33,20 +33,57 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import IconButton from "@mui/material/IconButton";
 import PropTypes from "prop-types";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
-import axios from "../../../../../api/axiosInstance";
-
+import axiosInstance from "../../../../../api/axiosInstance";
+import { useMaterialUIController } from "../../../../../context";
 
 function GenerateReport({ open, onClose }) {
+  const [controller] = useMaterialUIController();
+  const { darkMode } = controller;
+  const uiColors = useMemo(
+    () => ({
+      navy: darkMode ? "#4f7bb5" : "#0f2747",
+      navyHover: darkMode ? "#3f6aa3" : "#0b1e38",
+      steel: darkMode ? "#7c8fa6" : "#4b5d73",
+      steelHover: darkMode ? "#6b7f97" : "#3c4c60",
+      teal: darkMode ? "#3aa08f" : "#0f6b62",
+      tealHover: darkMode ? "#2f8b7c" : "#0b544d",
+      amber: darkMode ? "#d19a3f" : "#a66700",
+      amberHover: darkMode ? "#b7832f" : "#8c5600",
+      bg: darkMode ? "#0f1117" : "#f5f7fb",
+      headerStart: darkMode ? "#22314a" : "#1f3a5f",
+      headerEnd: darkMode ? "#2f4566" : "#3c5d86",
+    }),
+    [darkMode]
+  );
+  const inputSx = {
+    "& .MuiInputBase-input": {
+      color: (theme) => theme.palette.text.primary,
+    },
+    "& .MuiInputLabel-root": {
+      color: (theme) => theme.palette.text.secondary,
+    },
+    "& .MuiInputLabel-root.Mui-focused": {
+      color: (theme) => theme.palette.text.primary,
+    },
+    "& .MuiOutlinedInput-notchedOutline": {
+      borderColor: (theme) => theme.palette.divider,
+    },
+    "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+      borderColor: (theme) => theme.palette.text.secondary,
+    },
+    "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: (theme) => theme.palette.text.primary,
+    },
+  };
   const [status, setStatus] = useState("idle");
   const [dateType, setDateType] = useState("dateRange");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-  const [reportType, setReportType] = useState("real_property_tax_data");
+  const [reportType, setReportType] = useState("51");
   const [cashier, setCashier] = useState("");
   const [data, setData] = useState([]);
   const [page, setPage] = useState(0);
@@ -174,7 +211,7 @@ function GenerateReport({ open, onClose }) {
     };
 
     try {
-      const response = await axios.post("/generate-report", payload);
+      const response = await axiosInstance.post("generate-report", payload);
 
       const result = response.data;
       console.log("API Response:", result);
@@ -212,7 +249,7 @@ function GenerateReport({ open, onClose }) {
 
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("RealPropertyTax", `report-${Date.now()}.csv`);
+    link.setAttribute("GeneralFundReport", `report-${Date.now()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -237,13 +274,15 @@ function GenerateReport({ open, onClose }) {
             p: 0,
             minHeight: "600px",
             overflow: "hidden",
+            backgroundColor: (theme) => theme.palette.background.paper,
+            border: "1px solid #d6a12b",
           },
         },
       }}
     >
       <DialogTitle
         sx={{
-          bgcolor: "primary.main",
+          background: `linear-gradient(135deg, ${uiColors.headerStart}, ${uiColors.headerEnd})`,
           color: "white",
           py: 2.5,
           px: 3,
@@ -256,18 +295,32 @@ function GenerateReport({ open, onClose }) {
               Generate Financial Report
             </Typography>
           </Box>
-          <IconButton onClick={handleClose} sx={{ color: "white" }}>
-            <CloseIcon />
-          </IconButton>
+          <Button
+            onClick={handleClose}
+            variant="outlined"
+            startIcon={<CloseIcon />}
+            sx={{
+              color: "#f8e1a6",
+              borderColor: "#d6a12b",
+              textTransform: "none",
+              fontWeight: 700,
+              "&:hover": {
+                borderColor: "#f2cf74",
+                backgroundColor: "rgba(214, 161, 43, 0.12)",
+              },
+            }}
+          >
+            Close
+          </Button>
         </Box>
       </DialogTitle>
 
-      <DialogContent sx={{ py: 3, px: 3 }}>
+      <DialogContent sx={{ py: 3, px: 3, backgroundColor: uiColors.bg }}>
         <form onSubmit={handleSubmit}>
-          <Row Row className="mt-3">
+          <Row className="mt-3">
             <Col>
               <Box display="flex" alignItems="center" mb={1}>
-                <CalendarMonthOutlined color="primary" sx={{ mr: 1 }} />
+                <CalendarMonthOutlined sx={{ mr: 1, color: uiColors.navy }} />
                 <Typography variant="subtitle1" fontWeight="bold">
                   Date Selection
                 </Typography>
@@ -276,7 +329,7 @@ function GenerateReport({ open, onClose }) {
             </Col>
           </Row>
 
-          <Row Row className="mt-3">
+          <Row className="mt-3">
             <Col>
               <FormControl fullWidth size="small" variant="outlined">
                 <InputLabel>Date Selection Type</InputLabel>
@@ -284,6 +337,7 @@ function GenerateReport({ open, onClose }) {
                   value={dateType}
                   onChange={(e) => setDateType(e.target.value)}
                   label="Date Selection Type"
+                  sx={inputSx}
                 >
                   <MenuItem value="dateRange">Date Range</MenuItem>
                   <MenuItem value="monthYear">Month & Year</MenuItem>
@@ -292,7 +346,7 @@ function GenerateReport({ open, onClose }) {
             </Col>
           </Row>
 
-          <Row Row className="mt-3">
+          <Row className="mt-3">
             {dateType === "dateRange" && (
               <>
                 <Col md={6} className="mb-3">
@@ -304,8 +358,11 @@ function GenerateReport({ open, onClose }) {
                     onChange={(e) => setDateFrom(e.target.value)}
                     size="small"
                     variant="outlined"
-                    InputLabelProps={{ shrink: true }}
-                    sx={{ mb: 2 }}
+                    InputLabelProps={{
+                      // Correct prop for MUI TextField
+                      shrink: true,
+                    }}
+                    sx={{ mb: 2, ...inputSx }} // Optional spacing
                   />
                 </Col>
                 <Col md={6} className="mb-3">
@@ -317,8 +374,10 @@ function GenerateReport({ open, onClose }) {
                     onChange={(e) => setDateTo(e.target.value)}
                     size="small"
                     variant="outlined"
-                    InputLabelProps={{ shrink: true }}
-                    sx={{ mb: 2 }}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    sx={{ mb: 2, ...inputSx }}
                   />
                 </Col>
               </>
@@ -335,9 +394,10 @@ function GenerateReport({ open, onClose }) {
                   type="month"
                   value={dateFrom}
                   onChange={(e) => setDateFrom(e.target.value)}
+                  InputLabelProps={{ shrink: true }}
                   size="small"
                   variant="outlined"
-                  InputLabelProps={{ shrink: true }}
+                  sx={inputSx}
                 />
               </Col>
               <Col>
@@ -349,7 +409,7 @@ function GenerateReport({ open, onClose }) {
                   onChange={(e) => setDateTo(e.target.value)}
                   size="small"
                   variant="outlined"
-                  InputLabelProps={{ shrink: true }}
+                  sx={inputSx}
                 />
               </Col>
             </Row>
@@ -358,7 +418,7 @@ function GenerateReport({ open, onClose }) {
           <Row>
             <Col>
               <Box display="flex" alignItems="center" mb={1}>
-                <ReceiptLongOutlined color="primary" sx={{ mr: 1 }} />
+                <ReceiptLongOutlined sx={{ mr: 1, color: uiColors.navy }} />
                 <Typography variant="subtitle1" fontWeight="bold">
                   Report Details
                 </Typography>
@@ -367,7 +427,7 @@ function GenerateReport({ open, onClose }) {
             </Col>
           </Row>
 
-          <Row Row className="mt-3">
+          <Row className="mt-3">
             <Col>
               <FormControl fullWidth size="small" variant="outlined">
                 <InputLabel>Report Type</InputLabel>
@@ -375,10 +435,9 @@ function GenerateReport({ open, onClose }) {
                   value={reportType}
                   onChange={(e) => setReportType(e.target.value)}
                   label="Report Type"
+                  sx={inputSx}
                 >
-                  <MenuItem value="real_property_tax_data">
-                    Real Property Tax
-                  </MenuItem>
+                  <MenuItem value="real_property_tax_data">RPT</MenuItem>
                 </Select>
               </FormControl>
             </Col>
@@ -391,6 +450,7 @@ function GenerateReport({ open, onClose }) {
                   label="Cashier"
                   startAdornment={<PersonOutlined sx={{ mr: 1, ml: -0.5 }} />}
                   disabled={!reportType} // Disable until reportType is selected
+                  sx={inputSx}
                 >
                   {cashierOptionsByReport[reportType]?.map((name) => (
                     <MenuItem key={name} value={name}>
@@ -402,10 +462,10 @@ function GenerateReport({ open, onClose }) {
             </Col>
           </Row>
 
-          <Row Row className="mt-3">
+          <Row className="mt-3">
             <Col>
               <Box display="flex" alignItems="center" mb={1} mt={2}>
-                <SearchOutlined color="primary" sx={{ mr: 1 }} />
+                <SearchOutlined sx={{ mr: 1, color: uiColors.navy }} />
                 <Typography variant="subtitle1" fontWeight="bold">
                   Optional Filters
                 </Typography>
@@ -414,7 +474,7 @@ function GenerateReport({ open, onClose }) {
             </Col>
           </Row>
 
-          <Row Row className="mt-3">
+          <Row className="mt-3">
             <Col>
               <TextField
                 fullWidth
@@ -424,6 +484,7 @@ function GenerateReport({ open, onClose }) {
                 onChange={(e) => setOrFrom(e.target.value)}
                 size="small"
                 variant="outlined"
+                sx={inputSx}
               />
             </Col>
             <Col>
@@ -435,6 +496,7 @@ function GenerateReport({ open, onClose }) {
                 onChange={(e) => setOrTo(e.target.value)}
                 size="small"
                 variant="outlined"
+                sx={inputSx}
               />
             </Col>
           </Row>
@@ -444,13 +506,17 @@ function GenerateReport({ open, onClose }) {
               <Button
                 type="submit"
                 variant="contained"
-                color="primary"
                 fullWidth
                 disabled={status === "loading"}
                 sx={{
                   mt: 2,
                   py: 1.5,
                   borderRadius: 2,
+                  textTransform: "none",
+                  backgroundColor: uiColors.navy,
+                  "&:hover": {
+                    backgroundColor: uiColors.navyHover,
+                  },
                 }}
                 startIcon={
                   status === "loading" ? (
@@ -497,12 +563,13 @@ function GenerateReport({ open, onClose }) {
                     mt: 3,
                     borderRadius: 2,
                     overflow: "hidden",
+                    border: (theme) => `1px solid ${theme.palette.divider}`,
                   }}
                 >
                   <Box
                     sx={{
-                      bgcolor: "primary.light",
-                      color: "primary.contrastText",
+                      background: `linear-gradient(135deg, ${uiColors.headerStart}, ${uiColors.headerEnd})`,
+                      color: "#fff",
                       p: 2,
                       display: "flex",
                       justifyContent: "space-between",
@@ -526,7 +593,8 @@ function GenerateReport({ open, onClose }) {
                           <TableCell
                             sx={{
                               fontWeight: "bold",
-                              bgcolor: "grey.100",
+                              background: `linear-gradient(135deg, ${uiColors.headerStart}, ${uiColors.headerEnd})`,
+                              color: "#fff",
                             }}
                           >
                             Date
@@ -534,7 +602,8 @@ function GenerateReport({ open, onClose }) {
                           <TableCell
                             sx={{
                               fontWeight: "bold",
-                              bgcolor: "grey.100",
+                              background: `linear-gradient(135deg, ${uiColors.headerStart}, ${uiColors.headerEnd})`,
+                              color: "#fff",
                             }}
                           >
                             Cashier
@@ -542,7 +611,8 @@ function GenerateReport({ open, onClose }) {
                           <TableCell
                             sx={{
                               fontWeight: "bold",
-                              bgcolor: "grey.100",
+                              background: `linear-gradient(135deg, ${uiColors.headerStart}, ${uiColors.headerEnd})`,
+                              color: "#fff",
                             }}
                           >
                             Type of Report
@@ -550,7 +620,8 @@ function GenerateReport({ open, onClose }) {
                           <TableCell
                             sx={{
                               fontWeight: "bold",
-                              bgcolor: "grey.100",
+                              background: `linear-gradient(135deg, ${uiColors.headerStart}, ${uiColors.headerEnd})`,
+                              color: "#fff",
                             }}
                           >
                             OR#
@@ -558,7 +629,8 @@ function GenerateReport({ open, onClose }) {
                           <TableCell
                             sx={{
                               fontWeight: "bold",
-                              bgcolor: "grey.100",
+                              background: `linear-gradient(135deg, ${uiColors.headerStart}, ${uiColors.headerEnd})`,
+                              color: "#fff",
                             }}
                           >
                             Total
@@ -571,54 +643,50 @@ function GenerateReport({ open, onClose }) {
                             page * rowsPerPage,
                             page * rowsPerPage + rowsPerPage
                           )
-                          .map((row) => {
-                            let reportLabel = row.report_type;
-
-                            if (
-                              row.cashier === "AMABELLA" &&
-                              row.report_type === "GF"
-                            ) {
-                              reportLabel = "Cash Tickets";
-                            } else if (row.report_type === "GF") {
-                              reportLabel = "General Fund";
-                            } else if (row.report_type === "TF") {
-                              reportLabel = "Trust Fund";
-                            }
-
-                            return (
-                              <TableRow
-                                key={row.or_number}
-                                hover
-                                sx={{
-                                  "&:last-child td, &:last-child th": {
-                                    border: 0,
-                                  },
-                                }}
-                              >
-                                <TableCell>{formatDate(row.date)}</TableCell>
-                                <TableCell>
-                                  <Chip
-                                    label={row.cashier}
-                                    size="small"
-                                    color="primary"
-                                    variant="outlined"
-                                  />
-                                </TableCell>
-                                <TableCell>{reportLabel}</TableCell>
-                                <TableCell>{row.or_number}</TableCell>
-                                <TableCell sx={{ fontWeight: "medium" }}>
-                                  {formatCurrency(row.total)}
-                                </TableCell>
-                              </TableRow>
-                            );
-                          })}
+                          .map((row) => (
+                            <TableRow
+                              key={row.or_number}
+                              hover
+                              sx={{
+                                "&:last-child td, &:last-child th": {
+                                  border: 0,
+                                },
+                              }}
+                            >
+                              <TableCell>{formatDate(row.date)}</TableCell>
+                              <TableCell>
+                                <Chip
+                                  label={row.cashier}
+                                  size="small"
+                                  variant="outlined"
+                                  sx={{
+                                    borderColor: uiColors.steel,
+                                    color: uiColors.steel,
+                                  }}
+                                />
+                              </TableCell>
+                              <TableCell>
+                                {row.cashier === "AMABELLA" &&
+                                row.report_type === "GF"
+                                  ? "Cash Tickets"
+                                  : row.report_type === "GF"
+                                    ? "General Fund"
+                                    : row.report_type === "TF"
+                                      ? "Trust Fund"
+                                      : row.report_type}
+                              </TableCell>
+                              <TableCell>{row.or_number}</TableCell>
+                              <TableCell sx={{ fontWeight: "medium" }}>
+                                {formatCurrency(row.total)}
+                              </TableCell>
+                            </TableRow>
+                          ))}
                       </TableBody>
                     </Table>
                   </TableContainer>
 
                   <Button
                     variant="outlined"
-                    color="primary"
                     fullWidth
                     onClick={handleDownload}
                     sx={{
@@ -626,6 +694,12 @@ function GenerateReport({ open, onClose }) {
                       py: 1.25,
                       borderRadius: 2,
                       textTransform: "none",
+                      borderColor: uiColors.navy,
+                      color: uiColors.navy,
+                      "&:hover": {
+                        borderColor: uiColors.navyHover,
+                        backgroundColor: "rgba(15, 39, 71, 0.08)",
+                      },
                     }}
                     startIcon={<DownloadIcon />}
                   >
@@ -639,7 +713,7 @@ function GenerateReport({ open, onClose }) {
                     page={page}
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
-                    sx={{ borderTop: "1px solid rgba(224, 224, 224, 1)" }}
+                    sx={{ borderTop: (theme) => `1px solid ${theme.palette.divider}` }}
                   />
                 </Paper>
               )}
@@ -654,7 +728,7 @@ function GenerateReport({ open, onClose }) {
 // Prop types validation
 GenerateReport.propTypes = {
   onClose: PropTypes.func.isRequired,
-  open: PropTypes.func.isRequired,
+  open: PropTypes.bool.isRequired,
 };
 
 export default GenerateReport;

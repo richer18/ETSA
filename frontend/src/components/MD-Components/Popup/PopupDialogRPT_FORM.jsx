@@ -1,49 +1,76 @@
-import { Button } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import { Box, Button, Typography } from "@mui/material";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import PropTypes from "prop-types";
+import React from "react";
 
 function PopupDialog({ onClose, children }) {
   return (
     <Dialog
       open={true}
       onClose={onClose}
-      maxWidth="md" // Adjust dialog width
-      fullWidth // Make it take full width
+      maxWidth="md"
+      fullWidth
       PaperProps={{
         sx: {
-          backgroundColor: "#f5f5f5", // Light gray background
-          color: "#333", // Dark text color
-          borderRadius: "12px", // Rounded corners
-          boxShadow: "0px 5px 15px rgba(0, 0, 0, 0.2)", // Soft shadow effect
+          backgroundColor: "#f7f9fc",
+          color: "#0f172a",
+          borderRadius: "16px",
+          border: "1px solid #d6a12b",
+          boxShadow: "0 20px 40px rgba(10, 18, 30, 0.35)",
+          overflow: "hidden",
         },
       }}
     >
       <DialogTitle
         sx={{
-          backgroundColor: "#0080A7", // Dark blue header
+          p: { xs: 2, sm: 2.5 },
+          background:
+            "linear-gradient(135deg, #0b1f33 0%, #17324f 55%, #1f3d5e 100%)",
           color: "#fff",
-          fontSize: "1.2rem",
-          fontWeight: "bold",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          padding: "12px 24px",
+          gap: 2,
         }}
       >
-        Abstract of Real Property Tax
-        <Button onClick={onClose} variant="contained" color="error">
+        <Box>
+          <Typography variant="overline" sx={{ letterSpacing: 2, color: "#f5e7c1" }}>
+            Real Property Tax Abstract
+          </Typography>
+          <Typography variant="h6" sx={{ fontWeight: 800, letterSpacing: 0.4 }}>
+            Real Property Tax Form - Official Use
+          </Typography>
+          <Typography variant="body2" sx={{ opacity: 0.85, color: "#e3ecf7" }}>
+            Office of the Treasurer
+          </Typography>
+        </Box>
+        <Button
+          onClick={onClose}
+          variant="outlined"
+          startIcon={<CloseIcon />}
+          sx={{
+            color: "#f8e1a6",
+            borderColor: "#d6a12b",
+            textTransform: "none",
+            fontWeight: 700,
+            "&:hover": {
+              borderColor: "#f2cf74",
+              backgroundColor: "rgba(214, 161, 43, 0.12)",
+            },
+          }}
+        >
           Close
         </Button>
       </DialogTitle>
 
-      <DialogContent sx={{ padding: "20px 24px" }}>{children}</DialogContent>
+      <DialogContent sx={{ p: { xs: 2, sm: 3 } }}>{children}</DialogContent>
     </Dialog>
   );
 }
 
-// Prop types validation
 PopupDialog.propTypes = {
   onClose: PropTypes.func.isRequired,
   children: PropTypes.node.isRequired,

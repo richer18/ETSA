@@ -76,6 +76,7 @@ const NAVIGATION = [
     icon: <CalendarMonthIcon sx={{ color: "primary.main" }} />,
   },
   {
+    // segment: "abstract",
     title: "Abstract",
     icon: <ArticleIcon sx={{ color: "secondary.main" }} />,
     children: [
@@ -102,6 +103,7 @@ const NAVIGATION = [
     ],
   },
   {
+    segment: "business",
     title: "Business",
     icon: <BusinessIcon sx={{ color: "warning.main" }} />,
     children: [
@@ -123,6 +125,7 @@ const NAVIGATION = [
     ],
   },
   {
+    segment: "tickets",
     title: "Tickets",
     icon: <BookOnlineIcon sx={{ color: "info.main" }} />,
     children: [
@@ -193,32 +196,32 @@ const NAVIGATION = [
         icon: <AssignmentIcon sx={{ color: "primary.main" }} />,
       },
       {
-        segment: "email-sent",
+        segment: "email-sent-rcd-gf",
         title: "RCD GF",
         icon: <ArticleIcon sx={{ color: "success.main" }} />,
       },
       {
-        segment: "email-sent",
+        segment: "email-sent-rcd-sef",
         title: "RCD SEF",
         icon: <BookOnlineIcon sx={{ color: "success.main" }} />,
       },
       {
-        segment: "email-sent",
+        segment: "email-sent-mch-application",
         title: "MCH Application",
         icon: <DirectionsTransitFilledIcon sx={{ color: "warning.main" }} />,
       },
       {
-        segment: "email-sent",
+        segment: "email-sent-mch-certification",
         title: "MCH Certification",
         icon: <HowToRegIcon sx={{ color: "info.main" }} />,
       },
       {
-        segment: "email-sent",
+        segment: "email-sent-mch-order",
         title: "MCH Order",
         icon: <SellIcon sx={{ color: "secondary.main" }} />,
       },
       {
-        segment: "email-sent",
+        segment: "email-sent-mch-clearance",
         title: "MCH Clearance",
         icon: <GavelIcon sx={{ color: "primary.main" }} />,
       },
@@ -259,6 +262,7 @@ const NAVIGATION = [
     title: "Analytics",
   },
   {
+    segment: "reports",
     title: "Reports",
     icon: <BarChartIcon sx={{ color: "primary.main" }} />,
     children: [
@@ -278,11 +282,6 @@ const NAVIGATION = [
         icon: <DescriptionIcon sx={{ color: "text.secondary" }} />,
       },
       {
-        segment: "rcd",
-        title: "RCD",
-        icon: <DescriptionIcon sx={{ color: "text.secondary" }} />,
-      },
-      {
         segment: "esre",
         title: "ESRE",
         icon: <DescriptionIcon sx={{ color: "text.secondary" }} />,
@@ -297,10 +296,20 @@ const NAVIGATION = [
 ];
 
 const demoTheme = createTheme({
-  cssVariables: {
-    colorSchemeSelector: "data-toolpad-color-scheme",
+  colorSchemes: { light: true },
+  components: {
+    MuiListItemButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 10,
+          border: "1px solid transparent",
+          "&:hover": {
+            borderColor: "#d6a12b",
+          },
+        },
+      },
+    },
   },
-  colorSchemes: { light: true, dark: true },
   breakpoints: {
     values: {
       xs: 0,
@@ -311,6 +320,21 @@ const demoTheme = createTheme({
     },
   },
 });
+
+const resolveNavigationTitle = (pathname) => {
+  const segment = pathname.replace(/^\/my-app\/?/, "");
+  const findTitle = (items) => {
+    for (const item of items) {
+      if (item.segment === segment) return item.title;
+      if (item.children) {
+        const childTitle = findTitle(item.children);
+        if (childTitle) return childTitle;
+      }
+    }
+    return null;
+  };
+  return findTitle(NAVIGATION) || "Dashboard";
+};
 
 function DemoPageContent({ pathname }) {
   const breadcrumbItems = pathname.split("/").filter(Boolean);
@@ -331,6 +355,7 @@ function DemoPageContent({ pathname }) {
           display: "flex",
           justifyContent: "start",
           alignItems: "center",
+          gap: 2,
           mb: 2,
         }}
       >
@@ -389,6 +414,33 @@ function DashboardLayoutBranding(props) {
     }),
     [pathname, navigate, location.search]
   );
+  const resolvePageTitle = React.useMemo(
+    () => resolveNavigationTitle(router.pathname),
+    [router.pathname]
+  );
+  const brandingTitle = (
+    <Box sx={{ display: "flex", alignItems: "center" }}>
+      <Box sx={{ fontWeight: 700, whiteSpace: "nowrap" }}>ETMS</Box>
+      <Box
+        sx={{
+          position: "fixed",
+          left: "50%",
+          transform: "translateX(-50%)",
+          top: 0,
+          height: { xs: 56, sm: 64 },
+          display: "flex",
+          alignItems: "center",
+          fontWeight: 700,
+          pointerEvents: "none",
+          whiteSpace: "nowrap",
+          textTransform: "uppercase",
+          color: "#000000",
+        }}
+      >
+        {resolvePageTitle}
+      </Box>
+    </Box>
+  );
 
   const demoWindow = window !== undefined ? window() : undefined;
 
@@ -400,7 +452,7 @@ function DashboardLayoutBranding(props) {
         navigation={NAVIGATION}
         branding={{
           logo: <img src="/assets/images/ZAMBO_LOGO_P.png" alt="LGU logo" />,
-          title: "ETMS",
+          title: brandingTitle,
           // homeUrl: "/toolpad/core/introduction",
         }}
         router={router}
@@ -780,7 +832,7 @@ function DashboardHome() {
           p: { xs: 2, md: 3 },
           borderRadius: 4,
           background:
-            "linear-gradient(135deg, rgba(20,41,109,0.98) 0%, rgba(26,82,173,0.95) 55%, rgba(19,127,140,0.92) 100%)",
+            "linear-gradient(135deg, rgba(15,39,71,0.98) 0%, rgba(15,39,71,0.92) 55%, rgba(214,161,43,0.25) 100%)",
           color: "white",
           boxShadow: "0 18px 36px rgba(9, 30, 66, 0.28)",
         }}
@@ -804,18 +856,18 @@ function DashboardHome() {
               <Chip
                 label={`Month: ${months[month - 1]}`}
                 size="small"
-                sx={{ bgcolor: "rgba(255,255,255,0.16)", color: "white" }}
+                sx={{ bgcolor: "rgba(214,161,43,0.25)", color: "white" }}
               />
               <Chip
                 label={`Year: ${year}`}
                 size="small"
-                sx={{ bgcolor: "rgba(255,255,255,0.16)", color: "white" }}
+                sx={{ bgcolor: "rgba(214,161,43,0.25)", color: "white" }}
               />
               <Chip
                 label={loading ? "Syncing..." : "Data Ready"}
                 size="small"
                 sx={{
-                  bgcolor: loading ? "rgba(255,193,7,0.25)" : "rgba(76,175,80,0.25)",
+                  bgcolor: loading ? "rgba(214,161,43,0.35)" : "rgba(214,161,43,0.25)",
                   color: "white",
                 }}
               />
@@ -826,8 +878,9 @@ function DashboardHome() {
               variant="contained"
               onClick={() => setShowFilter((s) => !s)}
               sx={{
-                bgcolor: "rgba(255,255,255,0.16)",
-                "&:hover": { bgcolor: "rgba(255,255,255,0.25)" },
+                bgcolor: "rgba(214,161,43,0.28)",
+                color: "white",
+                "&:hover": { bgcolor: "rgba(214,161,43,0.4)" },
               }}
             >
               Filter Period
@@ -837,10 +890,10 @@ function DashboardHome() {
               onClick={exportCsv}
               sx={{
                 color: "white",
-                borderColor: "rgba(255,255,255,0.55)",
+                borderColor: "rgba(214,161,43,0.65)",
                 "&:hover": {
-                  borderColor: "white",
-                  bgcolor: "rgba(255,255,255,0.08)",
+                  borderColor: "rgba(214,161,43,0.95)",
+                  bgcolor: "rgba(214,161,43,0.12)",
                 },
               }}
             >
@@ -851,7 +904,15 @@ function DashboardHome() {
       </Paper>
 
       {showFilter && (
-        <Paper sx={{ p: 2, mb: 2, borderRadius: 3 }}>
+        <Paper
+          sx={{
+            p: 2,
+            mb: 2,
+            borderRadius: 3,
+            border: "1px solid #d6a12b",
+            boxShadow: "0 6px 16px rgba(15, 39, 71, 0.08)",
+          }}
+        >
           <Box sx={{ display: "flex", gap: 2, alignItems: "center", flexWrap: "wrap" }}>
             <FormControl size="small">
               <InputLabel id="month-label">Month</InputLabel>
@@ -860,7 +921,7 @@ function DashboardHome() {
                 value={month}
                 label="Month"
                 onChange={(e) => setMonth(e.target.value)}
-                sx={{ minWidth: 160 }}
+                sx={{ minWidth: 160, borderRadius: "10px" }}
               >
                 {months.map((m, i) => (
                   <MenuItem key={m} value={i + 1}>
@@ -877,7 +938,7 @@ function DashboardHome() {
                 value={year}
                 label="Year"
                 onChange={(e) => setYear(e.target.value)}
-                sx={{ minWidth: 120 }}
+                sx={{ minWidth: 120, borderRadius: "10px" }}
               >
                 {Array.from({ length: 8 }).map((_, idx) => {
                   const y = new Date().getFullYear() - idx;
@@ -890,10 +951,21 @@ function DashboardHome() {
               </Select>
             </FormControl>
 
-            <Button variant="contained" onClick={handleApplyFilter}>
+            <Button
+              variant="contained"
+              onClick={handleApplyFilter}
+              sx={{
+                bgcolor: "#0f2747",
+                "&:hover": { bgcolor: "#0b1e38" },
+              }}
+            >
               Apply
             </Button>
-            <Button variant="text" onClick={() => setShowFilter(false)}>
+            <Button
+              variant="text"
+              onClick={() => setShowFilter(false)}
+              sx={{ color: "#0f2747", fontWeight: 700 }}
+            >
               Close
             </Button>
           </Box>

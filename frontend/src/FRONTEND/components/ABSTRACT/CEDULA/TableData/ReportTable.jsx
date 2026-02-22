@@ -247,8 +247,9 @@ function ReportTable({ onBack }) {
           mb: 4,
           p: 3,
           bgcolor: "background.paper",
-          borderRadius: 2,
-          boxShadow: 1,
+          borderRadius: 3,
+          border: "1px solid #d6a12b",
+          boxShadow: "0 8px 20px rgba(15, 23, 42, 0.08)",
         }}
       >
         <Button
@@ -258,8 +259,13 @@ function ReportTable({ onBack }) {
           sx={{
             borderRadius: "8px",
             textTransform: "none",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-            "&:hover": { boxShadow: "0 4px 8px rgba(0,0,0,0.15)" },
+            fontWeight: 700,
+            backgroundColor: "#0f2747",
+            boxShadow: "0 4px 10px rgba(15, 39, 71, 0.25)",
+            "&:hover": {
+              backgroundColor: "#0b1e38",
+              boxShadow: "0 6px 14px rgba(15, 39, 71, 0.35)",
+            },
           }}
         >
           Back
@@ -277,7 +283,31 @@ function ReportTable({ onBack }) {
             onChange={handleMonthChange}
             value={month}
             renderInput={(params) => (
-              <TextField {...params} label="Select Month" variant="outlined" />
+              <TextField
+                {...params}
+                label="Select Month"
+                variant="outlined"
+                sx={{
+                  "& .MuiInputBase-input": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.divider,
+                  },
+                  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.primary,
+                  },
+                }}
+              />
             )}
           />
           <Autocomplete
@@ -291,7 +321,31 @@ function ReportTable({ onBack }) {
             onChange={handleYearChange}
             value={year}
             renderInput={(params) => (
-              <TextField {...params} label="Select Year" variant="outlined" />
+              <TextField
+                {...params}
+                label="Select Year"
+                variant="outlined"
+                sx={{
+                  "& .MuiInputBase-input": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.divider,
+                  },
+                  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.primary,
+                  },
+                }}
+              />
             )}
           />
         </Box>
@@ -539,24 +593,29 @@ function ReportTable({ onBack }) {
           mb: 4,
           p: 3,
           bgcolor: "background.paper",
-          borderRadius: 2,
-          boxShadow: 1,
+          borderRadius: 3,
+          border: "1px solid #d6a12b",
+          boxShadow: "0 8px 20px rgba(15, 23, 42, 0.08)",
         }}
       >
         {/* Print PDF Button */}
         <Button
           variant="contained"
-          color="primary"
           onClick={handlePrint}
           sx={{
             display: "flex",
             alignItems: "center",
             gap: 1,
             textTransform: "none",
-            borderRadius: "12px",
-            padding: "10px 20px",
-            fontWeight: 600,
-            "&:hover": { backgroundColor: "secondary.main" },
+            borderRadius: "10px",
+            padding: "10px 22px",
+            fontWeight: 700,
+            backgroundColor: "#0f2747",
+            boxShadow: "0 4px 10px rgba(15, 39, 71, 0.25)",
+            "&:hover": {
+              backgroundColor: "#0b1e38",
+              boxShadow: "0 6px 14px rgba(15, 39, 71, 0.35)",
+            },
           }}
           startIcon={<PrintIcon />}
         >
@@ -566,17 +625,21 @@ function ReportTable({ onBack }) {
         {/* Download Excel Button */}
         <Button
           variant="outlined"
-          color="success"
           onClick={() => handleDownloadExcel(month, year)}
           sx={{
             display: "flex",
             alignItems: "center",
             gap: 1,
             textTransform: "none",
-            borderRadius: "12px",
-            padding: "10px 20px",
-            fontWeight: 600,
-            "&:hover": { backgroundColor: "success.light" },
+            borderRadius: "10px",
+            padding: "10px 22px",
+            fontWeight: 700,
+            borderColor: "#0f2747",
+            color: "#0f2747",
+            "&:hover": {
+              borderColor: "#0b1e38",
+              backgroundColor: "rgba(15, 39, 71, 0.08)",
+            },
           }}
           startIcon={<FileDownloadIcon />}
         >

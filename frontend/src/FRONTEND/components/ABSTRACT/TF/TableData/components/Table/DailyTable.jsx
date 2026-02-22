@@ -33,10 +33,16 @@ import { useMemo, useState } from 'react';
 import axiosInstance from "../../../../../../../api/axiosInstance";
 import TrustFunds from "../../../../../../../components/MD-Components/FillupForm/AbstractTF";
 
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  fontWeight: 'bold',
-  textAlign: 'center',
-  whiteSpace: 'nowrap',
+const StyledTableCell = styled(TableCell)(() => ({
+  whiteSpace: "nowrap",
+  fontWeight: 700,
+  textAlign: "center",
+  textTransform: "uppercase",
+  letterSpacing: "1px",
+  fontSize: "0.9rem",
+  background: "#f7f9fc",
+  color: "#0f2747",
+  borderBottom: "2px solid #d6a12b",
 }));
 
 const SubHeaderCell = styled(StyledTableCell)(({ theme }) => ({
@@ -46,10 +52,13 @@ const SubHeaderCell = styled(StyledTableCell)(({ theme }) => ({
 }));
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  backgroundColor: 'rgba(0, 0, 0, 0.1)', // Row background with opacity
-  '&:hover': {
-    backgroundColor: 'rgba(0, 0, 0, 0.2)', // Hover effect with opacity
-    cursor: 'pointer',
+  backgroundColor: "rgba(0, 0, 0, 0.02)",
+  "&:hover": {
+    backgroundColor: theme.palette.action.hover,
+    cursor: "pointer",
+  },
+  "&:nth-of-type(even)": {
+    backgroundColor: "rgba(0, 0, 0, 0.03)",
   },
 }));
 
@@ -277,18 +286,45 @@ const totalSum = filteredData.reduce((acc, row) => acc + (parseFloat(row.TOTAL) 
         >
           <Button
             variant="contained"
-            color="primary"
             startIcon={<DownloadIcon />}
             onClick={handleDownload}
+            sx={{
+              px: 3,
+              py: 1.25,
+              fontWeight: 700,
+              fontSize: "0.9rem",
+              borderRadius: "10px",
+              backgroundColor: "#0f2747",
+              color: "#fff",
+              boxShadow: "0 4px 12px rgba(15, 39, 71, 0.25)",
+              transition: "all 0.2s ease",
+              "&:hover": {
+                backgroundColor: "#0b1e38",
+                boxShadow: "0 6px 16px rgba(15, 39, 71, 0.35)",
+              },
+            }}
           >
             Download CSV
           </Button>
 
           <Button
-            variant="contained"
-            color="secondary"
+            variant="outlined"
             startIcon={<PrintIcon />}
             onClick={handlePrint}
+            sx={{
+              px: 3,
+              py: 1.25,
+              fontWeight: 700,
+              fontSize: "0.9rem",
+              borderRadius: "10px",
+              borderColor: "#0f2747",
+              color: "#0f2747",
+              transition: "all 0.2s ease",
+              "&:hover": {
+                borderColor: "#0b1e38",
+                backgroundColor: "rgba(15, 39, 71, 0.08)",
+              },
+            }}
           >
             Print
           </Button>
@@ -307,14 +343,20 @@ const totalSum = filteredData.reduce((acc, row) => acc + (parseFloat(row.TOTAL) 
             },
             { value: totalCollectionByCashier["IRIS"], text: "IRIS RAFALES" },
             { value: totalCollectionByCashier["AGNES"], text: "AGNES ELLO" },
-          ].map(({ value, text }) => (
+          ].map(({ value, text }, index) => (
             <Card
               key={text}
               sx={{
                 flex: "1 1 250px",
                 p: 3,
                 borderRadius: "12px",
-                background: "linear-gradient(135deg, #3f51b5, #5c6bc0)",
+                background:
+                  [
+                    "linear-gradient(135deg, #0f2747, #2f4f7f)",
+                    "linear-gradient(135deg, #0f6b62, #2a8a7f)",
+                    "linear-gradient(135deg, #4b5d73, #6a7f99)",
+                    "linear-gradient(135deg, #a66700, #c98a2a)",
+                  ][index % 4],
                 color: "white",
                 boxShadow: "0 8px 24px rgba(63,81,181,0.15)",
                 transition: "transform 0.3s ease, box-shadow 0.3s ease",

@@ -1,4 +1,6 @@
 import { Box, Button, LinearProgress, Typography } from "@mui/material";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import SaveIcon from "@mui/icons-material/Save";
 import FormControl from "@mui/material/FormControl";
 import FormHelperText from "@mui/material/FormHelperText";
 import InputLabel from "@mui/material/InputLabel";
@@ -12,19 +14,67 @@ import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../../../../src/api/axiosInstance";
 import "./style.css";
-const Root = styled(Box)({
-  padding: "30px",
 
-  borderRadius: "8px",
+const uiColors = {
+  navy: "#0f2747",
+  navyHover: "#0b1e38",
+  amber: "#d6a12b",
+  border: "#d8e2ee",
+  bg: "#f7f9fc",
+  card: "#ffffff",
+};
+
+const Root = styled(Box)({
+  padding: 0,
+  borderRadius: "12px",
 });
 
 // InputField component for consistent styling
 const InputField = styled(TextField)(({ theme }) => ({
-  margin: theme.spacing(1),
+  marginTop: theme.spacing(1),
+  marginBottom: theme.spacing(1),
   "& .MuiInputBase-root": {
-    borderRadius: theme.shape.borderRadius,
+    borderRadius: 10,
+    backgroundColor: uiColors.card,
+  },
+  "& .MuiInputLabel-root": {
+    color: theme.palette.text.secondary,
+  },
+  "& .MuiInputLabel-root.Mui-focused": {
+    color: uiColors.navy,
+  },
+  "& .MuiOutlinedInput-notchedOutline": {
+    borderColor: uiColors.border,
+  },
+  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+    borderColor: "#b8c9dd",
+  },
+  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+    borderColor: uiColors.amber,
   },
 }));
+
+const selectControlSx = {
+  "& .MuiInputLabel-root": {
+    color: (theme) => theme.palette.text.secondary,
+  },
+  "& .MuiInputLabel-root.Mui-focused": {
+    color: uiColors.navy,
+  },
+  "& .MuiOutlinedInput-root": {
+    borderRadius: "10px",
+    backgroundColor: uiColors.card,
+  },
+  "& .MuiOutlinedInput-notchedOutline": {
+    borderColor: uiColors.border,
+  },
+  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+    borderColor: "#b8c9dd",
+  },
+  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+    borderColor: uiColors.amber,
+  },
+};
 
 const parseOrDefault = (value, defaultValue = 0) =>
   parseFloat(value) || defaultValue;
@@ -383,8 +433,30 @@ function AbstractRPT({ data, onSave }) {
 
   return (
     <Root>
+      <Typography
+        variant="h5"
+        sx={{
+          mb: 2.5,
+          textAlign: "center",
+          color: uiColors.navy,
+          fontWeight: 800,
+          letterSpacing: 0.3,
+        }}
+      >
+        Real Property Tax Abstracts ({formData.id ? "Edit" : "Add"})
+      </Typography>
       <form onSubmit={handleSubmit}>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            p: { xs: 1.5, md: 2 },
+            borderRadius: "14px",
+            border: "1px solid #d6a12b",
+            backgroundColor: uiColors.bg,
+          }}
+        >
           <InputField
             margin="dense"
             label="Date"
@@ -610,6 +682,7 @@ function AbstractRPT({ data, onSave }) {
               value={formData.barangay}
               onChange={handleFormDataChange}
               label="Barangay"
+              sx={selectControlSx}
             >
               <MenuItem value="BASAC">BASAC</MenuItem>
               <MenuItem value="CALANGO">CALANGO</MenuItem>
@@ -849,6 +922,7 @@ function AbstractRPT({ data, onSave }) {
             margin="dense"
             error={!!errors.status}
             required
+            sx={selectControlSx}
           >
             <InputLabel>Status</InputLabel>
             <Select
@@ -873,6 +947,7 @@ function AbstractRPT({ data, onSave }) {
             margin="dense"
             error={!!errors.cashier}
             required
+            sx={selectControlSx}
           >
             <InputLabel>Cashier</InputLabel>
             <Select
@@ -890,51 +965,81 @@ function AbstractRPT({ data, onSave }) {
           </FormControl>
 
           <FormControl
-  fullWidth
-  margin="dense"
-  error={!!errors.advanced_payment}
-  sx={{ mb: 2 }}
->
-  <InputLabel>Advance Payment Year</InputLabel>
-  <Select
-    name="advanced_payment"
-    value={formData.advanced_payment}
-    onChange={handleFormDataChange}
-    label="Advance Payment Year"
-  >
-    {[...Array(3)].map((_, i) => {
-      const year = new Date().getFullYear() + i; // start at 2026
-      return (
-        <MenuItem key={year} value={year}>
-          {year}
-        </MenuItem>
-      );
-    })}
-  </Select>
-  <FormHelperText>{errors.advanced_payment}</FormHelperText>
-</FormControl>
+            fullWidth
+            margin="dense"
+            error={!!errors.advanced_payment}
+            sx={{ ...selectControlSx, mb: 2 }}
+          >
+            <InputLabel>Advance Payment Year</InputLabel>
+            <Select
+              name="advanced_payment"
+              value={formData.advanced_payment}
+              onChange={handleFormDataChange}
+              label="Advance Payment Year"
+            >
+              {[...Array(3)].map((_, i) => {
+                const year = new Date().getFullYear() + i;
+                return (
+                  <MenuItem key={year} value={year}>
+                    {year}
+                  </MenuItem>
+                );
+              })}
+            </Select>
+            <FormHelperText>{errors.advanced_payment}</FormHelperText>
+          </FormControl>
 
-          <Box sx={{ display: "flex", gap: 2, mt: 4 }}>
+          <Box sx={{ display: "flex", gap: 2, mt: 2, flexWrap: "wrap" }}>
             <Button
               variant="outlined"
-              color="secondary"
               fullWidth
               onClick={handleReset}
+              startIcon={<RestartAltIcon />}
+              sx={{
+                flex: 1,
+                minWidth: 180,
+                borderColor: uiColors.navy,
+                color: uiColors.navy,
+                borderRadius: "10px",
+                textTransform: "none",
+                fontWeight: 700,
+                "&:hover": {
+                  borderColor: uiColors.navyHover,
+                  backgroundColor: "rgba(15, 39, 71, 0.08)",
+                },
+              }}
             >
               Reset
             </Button>
+            <Button
+              variant="contained"
+              fullWidth
+              onClick={handleSave}
+              startIcon={<SaveIcon />}
+              sx={{
+                flex: 1,
+                minWidth: 180,
+                borderRadius: "10px",
+                textTransform: "none",
+                fontWeight: 700,
+                backgroundColor: uiColors.navy,
+                boxShadow: "0 4px 10px rgba(15, 39, 71, 0.25)",
+                "&:hover": {
+                  backgroundColor: uiColors.navyHover,
+                  boxShadow: "0 6px 14px rgba(15, 39, 71, 0.35)",
+                },
+              }}
+            >
+              Save
+            </Button>
           </Box>
-          <Button
-            variant="contained"
-            color="primary"
-            fullWidth
-            onClick={handleSave}
-          >
-            Save
-          </Button>
 
           {/* Loading Indicator */}
-          {showProgress && <LinearProgressWithLabel value={progress} />}
+          {showProgress && (
+            <Box sx={{ mt: 1 }}>
+              <LinearProgressWithLabel value={progress} />
+            </Box>
+          )}
         </Box>
       </form>
     </Root>

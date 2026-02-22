@@ -29,11 +29,16 @@ import axios from "../../../../../api/axiosInstance";
 import CommentsDialog from './CommentsDialog';
 import ViewDialog from './ViewDialog'; // Import the ViewDialog component
 
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  backgroundColor: theme.palette.primary.dark,
-  color: theme.palette.common.white,
-  fontWeight: 'bold',
-  textAlign: 'center',
+const StyledTableCell = styled(TableCell)(() => ({
+  whiteSpace: "nowrap",
+  fontWeight: 700,
+  textAlign: "center",
+  textTransform: "uppercase",
+  letterSpacing: "1px",
+  fontSize: 11.5,
+  background: "#f7f9fc",
+  color: "#0f2747",
+  borderBottom: "2px solid #d6a12b",
 }));
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
@@ -352,26 +357,36 @@ function DailyTable({ onDataFiltered, onBack }) {
 
   return (
     <>
-      <Box sx={{
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      mt: 2,
-      mb: 4,
-      p: 3,
-      bgcolor: 'background.paper',
-      borderRadius: 2,
-      boxShadow: 1
-    }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mt: 2,
+          mb: 4,
+          p: 3,
+          bgcolor: "background.paper",
+          borderRadius: 3,
+          border: "1px solid #d6a12b",
+          boxShadow: "0 8px 20px rgba(15, 23, 42, 0.08)",
+          gap: 2,
+          flexWrap: "wrap",
+        }}
+      >
       <Button
       variant="contained"
       startIcon={<ArrowBackIcon />}
       onClick={onBack}
-      sx={{ 
-        borderRadius: '8px',
-        textTransform: 'none',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        '&:hover': { boxShadow: '0 4px 8px rgba(0,0,0,0.15)' }
+      sx={{
+        borderRadius: "8px",
+        textTransform: "none",
+        fontWeight: 700,
+        backgroundColor: "#0f2747",
+        boxShadow: "0 4px 10px rgba(15, 39, 71, 0.25)",
+        "&:hover": {
+          backgroundColor: "#0b1e38",
+          boxShadow: "0 6px 14px rgba(15, 39, 71, 0.35)",
+        },
       }}
     >
         Back
@@ -379,28 +394,87 @@ function DailyTable({ onDataFiltered, onBack }) {
       
       <Typography variant="h4" sx={{
         fontWeight: 700,
-        color: 'primary.main',
-        letterSpacing: 1
+        color: "#0f2747",
+        letterSpacing: 1,
+        textTransform: "uppercase",
       }}>
         Daily Collections
       </Typography>
       
-      <Box display="flex" gap={2} alignItems="center">
+      <Box display="flex" gap={2} alignItems="center" flexWrap="wrap">
       <Autocomplete
             disablePortal
             id="month-selector"
             options={months}
-            sx={{ width: 150, mr: 2 }}
+            sx={{
+              width: 150,
+              "& .MuiInputBase-root": { borderRadius: "8px" },
+            }}
             onChange={handleMonthChange}
-            renderInput={(params) => <TextField {...params} label="Month" />}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Month"
+                variant="outlined"
+                sx={{
+                  "& .MuiInputBase-input": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.divider,
+                  },
+                  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.primary,
+                  },
+                }}
+              />
+            )}
           />
           <Autocomplete
             disablePortal
             id="year-selector"
             options={years}
-            sx={{ width: 150 }}
+            sx={{
+              width: 150,
+              "& .MuiInputBase-root": { borderRadius: "8px" },
+            }}
             onChange={handleYearChange}
-            renderInput={(params) => <TextField {...params} label="Year" />}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Year"
+                variant="outlined"
+                sx={{
+                  "& .MuiInputBase-input": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.divider,
+                  },
+                  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.primary,
+                  },
+                }}
+              />
+            )}
           />
       </Box>
     </Box>
@@ -413,6 +487,7 @@ function DailyTable({ onDataFiltered, onBack }) {
         sx={{
           borderRadius: 4,
           boxShadow: 3,
+          overflow: "hidden",
           '& .MuiTableCell-root': {
             py: 2
           }
@@ -465,9 +540,14 @@ function DailyTable({ onDataFiltered, onBack }) {
                 <CenteredTableCell>
                   <Button
                     variant="contained"
-                    color="primary"
                     onClick={(event) => handleMenuClick(event, row)}
-                    sx={{ textTransform: 'none' }}
+                    sx={{
+                      textTransform: "none",
+                      px: 2,
+                      py: 0.75,
+                      fontSize: "0.75rem",
+                      borderRadius: 2,
+                    }}
                   >
                     Action
                   </Button>
@@ -475,6 +555,12 @@ function DailyTable({ onDataFiltered, onBack }) {
                     anchorEl={anchorEl}
                     open={Boolean(anchorEl) && currentRow === row}
                     onClose={handleMenuClose}
+                    slotProps={{
+                      paper: {
+                        elevation: 0,
+                        sx: { boxShadow: "none" },
+                      },
+                    }}
                     anchorOrigin={{
                       vertical: 'bottom',
                       horizontal: 'right',

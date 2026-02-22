@@ -29,27 +29,28 @@ import React, { useMemo, useState } from "react";
 import axiosInstance from "../../../../../../../api/axiosInstance";
 
 // Elegant header cell styling
-export const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-  color: theme.palette.common.white,
+export const StyledTableCell = styled(TableCell)(() => ({
+  whiteSpace: "nowrap",
   fontWeight: 700,
   textAlign: "center",
-  whiteSpace: "nowrap",
-  fontSize: "0.95rem",
-  borderBottom: `2px solid ${theme.palette.primary.light}`,
-  boxShadow: "inset 0 -1px 0 rgba(255, 255, 255, 0.1)",
+  textTransform: "uppercase",
+  letterSpacing: "1px",
+  fontSize: "0.9rem",
+  background: "#f7f9fc",
+  color: "#0f2747",
+  borderBottom: "2px solid #d6a12b",
 }));
 
 // Alternating row + hover effect
 export const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  backgroundColor: "rgba(0, 0, 0, 0.03)",
-  transition: "background-color 0.3s ease",
+  backgroundColor: "rgba(0, 0, 0, 0.02)",
+  transition: "background-color 0.2s ease",
   "&:hover": {
-    backgroundColor: "rgba(0, 0, 0, 0.08)",
+    backgroundColor: theme.palette.action.hover,
     cursor: "pointer",
   },
   "&:nth-of-type(even)": {
-    backgroundColor: "rgba(0, 0, 0, 0.05)",
+    backgroundColor: "rgba(0, 0, 0, 0.03)",
   },
 }));
 
@@ -293,16 +294,16 @@ const DailyTable_v2 = ({ data, onClose }) => {
             sx={{
               px: 3,
               py: 1.25,
-              fontWeight: 600,
+              fontWeight: 700,
               fontSize: "0.9rem",
-              borderRadius: "12px",
-              background: "linear-gradient(135deg, #3f51b5, #5c6bc0)",
+              borderRadius: "10px",
+              backgroundColor: "#0f2747",
               color: "#fff",
-              boxShadow: "0 4px 16px rgba(63, 81, 181, 0.2)",
-              transition: "all 0.3s ease",
+              boxShadow: "0 4px 12px rgba(15, 39, 71, 0.25)",
+              transition: "all 0.2s ease",
               "&:hover": {
-                background: "linear-gradient(135deg, #5c6bc0, #7986cb)",
-                boxShadow: "0 6px 24px rgba(63, 81, 181, 0.3)",
+                backgroundColor: "#0b1e38",
+                boxShadow: "0 6px 16px rgba(15, 39, 71, 0.35)",
               },
             }}
           >
@@ -310,22 +311,21 @@ const DailyTable_v2 = ({ data, onClose }) => {
           </Button>
 
           <Button
-            variant="contained"
+            variant="outlined"
             onClick={handlePrint}
             startIcon={<PrintIcon />}
             sx={{
               px: 3,
               py: 1.25,
-              fontWeight: 600,
+              fontWeight: 700,
               fontSize: "0.9rem",
-              borderRadius: "12px",
-              background: "linear-gradient(135deg, #e91e63, #f06292)",
-              color: "#fff",
-              boxShadow: "0 4px 16px rgba(233, 30, 99, 0.2)",
-              transition: "all 0.3s ease",
+              borderRadius: "10px",
+              borderColor: "#0f2747",
+              color: "#0f2747",
+              transition: "all 0.2s ease",
               "&:hover": {
-                background: "linear-gradient(135deg, #f06292, #f48fb1)",
-                boxShadow: "0 6px 24px rgba(233, 30, 99, 0.3)",
+                borderColor: "#0b1e38",
+                backgroundColor: "rgba(15, 39, 71, 0.08)",
               },
             }}
           >
@@ -343,7 +343,7 @@ const DailyTable_v2 = ({ data, onClose }) => {
             justifyContent: "center",
           }}
         >
-          {cashierData.map(({ key, label, gradient, icon }) => {
+          {cashierData.map(({ key, label, icon }, index) => {
             const value = totalCollectionByCashier[key];
             const formattedValue =
               typeof value === "number"
@@ -362,7 +362,14 @@ const DailyTable_v2 = ({ data, onClose }) => {
                   maxWidth: "260px", // ⬅️ smaller width
                   p: 2.5, // ⬅️ tighter padding
                   borderRadius: "16px",
-                  background: gradient,
+                  background:
+                    [
+                      "linear-gradient(135deg, #0f2747, #2f4f7f)",
+                      "linear-gradient(135deg, #0f6b62, #2a8a7f)",
+                      "linear-gradient(135deg, #4b5d73, #6a7f99)",
+                      "linear-gradient(135deg, #a66700, #c98a2a)",
+                      "linear-gradient(135deg, #1c2a3a, #2f4f7f)",
+                    ][index % 5],
                   color: "#ffffff",
                   boxShadow: "0 10px 24px rgba(0, 0, 0, 0.2)",
                   transition: "transform 0.4s ease, box-shadow 0.4s ease",

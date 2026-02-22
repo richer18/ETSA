@@ -26,16 +26,22 @@ import {
 
 import { format, parse, parseISO } from "date-fns";
 import dayjs from "dayjs";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import axiosInstance from "../../../../../api/axiosInstance";
 import CommentsDialog from "../../RPT/TableData/CommentsDialog";
 import DailyTablev2 from "../components/dailytablev2";
+import { useMaterialUIController } from "../../../../../context";
 // Styled components for table cells
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  backgroundColor: theme.palette.primary.main,
-  color: theme.palette.common.white,
-  fontWeight: "bold",
+const StyledTableCell = styled(TableCell)(() => ({
+  whiteSpace: "nowrap",
+  fontWeight: 700,
   textAlign: "center",
+  textTransform: "uppercase",
+  letterSpacing: "1px",
+  fontSize: 11.5,
+  background: "#f7f9fc",
+  color: "#0f2747",
+  borderBottom: "2px solid #d6a12b",
 }));
 
 const CenteredTableCell = styled(TableCell)({
@@ -89,6 +95,25 @@ const formatDate = (dateInput) => {
 };
 
 function DailyTable({ onBack, setShowFilters }) {
+  const [controller] = useMaterialUIController();
+  const { darkMode } = controller;
+  const uiColors = useMemo(
+    () => ({
+      navy: darkMode ? "#4f7bb5" : "#0f2747",
+      navyHover: darkMode ? "#3f6aa3" : "#0b1e38",
+      steel: darkMode ? "#7c8fa6" : "#4b5d73",
+      steelHover: darkMode ? "#6b7f97" : "#3c4c60",
+      teal: darkMode ? "#3aa08f" : "#0f6b62",
+      tealHover: darkMode ? "#2f8b7c" : "#0b544d",
+      amber: darkMode ? "#d19a3f" : "#a66700",
+      amberHover: darkMode ? "#b7832f" : "#8c5600",
+      red: darkMode ? "#d06666" : "#b23b3b",
+      redHover: darkMode ? "#b85656" : "#8f2f2f",
+      bg: darkMode ? "#0f1117" : "#f5f7fb",
+    }),
+    [darkMode]
+  );
+
   const [selectedMonth, setSelectedMonth] = useState(null);
   const [selectedYear, setSelectedYear] = useState(null);
   const [collectionData, setCollectionData] = useState([]);
@@ -203,8 +228,10 @@ function DailyTable({ onBack, setShowFilters }) {
       sx={{
         display: "flex",
         flexDirection: "column",
-        padding: 3,
+        padding: { xs: 2, md: 3 },
         marginTop: 2,
+        backgroundColor: uiColors.bg,
+        minHeight: "100%",
       }}
     >
       {/* Month and Year selectors */}
@@ -213,12 +240,15 @@ function DailyTable({ onBack, setShowFilters }) {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          gap: 2,
+          flexWrap: "wrap",
           mt: 2,
           mb: 4,
-          p: 3,
+          p: { xs: 2, md: 3 },
           bgcolor: "background.paper",
-          borderRadius: 2,
-          boxShadow: 1,
+          borderRadius: 3,
+          border: (theme) => `1px solid ${theme.palette.divider}`,
+          boxShadow: 2,
         }}
       >
         <Button
@@ -228,8 +258,12 @@ function DailyTable({ onBack, setShowFilters }) {
           sx={{
             borderRadius: "8px",
             textTransform: "none",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-            "&:hover": { boxShadow: "0 4px 8px rgba(0,0,0,0.15)" },
+            backgroundColor: uiColors.navy,
+            boxShadow: "0 2px 6px rgba(15, 39, 71, 0.2)",
+            "&:hover": {
+              backgroundColor: uiColors.navyHover,
+              boxShadow: "0 4px 10px rgba(15, 39, 71, 0.3)",
+            },
           }}
         >
           Back
@@ -239,34 +273,95 @@ function DailyTable({ onBack, setShowFilters }) {
           variant="h4"
           sx={{
             fontWeight: 700,
-            color: "primary.main",
+            color: uiColors.navy,
             letterSpacing: 1,
           }}
         >
           Daily Collections
         </Typography>
 
-        <Box display="flex" gap={2} alignItems="center">
+        <Box display="flex" gap={2} alignItems="center" flexWrap="wrap">
           <Autocomplete
             disablePortal
             id="month-selector"
             options={months}
-            sx={{ width: 150, mr: 2 }}
+            sx={{ width: { xs: "100%", sm: 160 } }}
             onChange={(e, value) => setSelectedMonth(value || null)}
-            renderInput={(params) => <TextField {...params} label="Month" />}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Month"
+                sx={{
+                  "& .MuiInputBase-input": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.divider,
+                  },
+                  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.primary,
+                  },
+                }}
+              />
+            )}
           />
           <Autocomplete
             disablePortal
             id="year-selector"
             options={years}
-            sx={{ width: 150 }}
+            sx={{ width: { xs: "100%", sm: 160 } }}
             onChange={(e, value) => setSelectedYear(value || null)}
-            renderInput={(params) => <TextField {...params} label="Year" />}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Year"
+                sx={{
+                  "& .MuiInputBase-input": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.divider,
+                  },
+                  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.primary,
+                  },
+                }}
+              />
+            )}
           />
         </Box>
       </Box>
 
-      <TableContainer component={Paper}>
+      <TableContainer
+        component={Paper}
+        sx={{
+          borderRadius: 4,
+          boxShadow: 3,
+          backgroundColor: (theme) => theme.palette.background.paper,
+          "& .MuiTableCell-root": {
+            py: 2,
+            color: (theme) => theme.palette.text.primary,
+          },
+        }}
+      >
         <Table aria-label="daily data table">
           <TableHead>
             <TableRow>
@@ -306,19 +401,22 @@ function DailyTable({ onBack, setShowFilters }) {
                           )
                         }
                       >
-                        <VisibilityIcon color="primary" />
-                      </IconButton>
-                    </Badge>
-                  </CenteredTableCell>
-                  <CenteredTableCell>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={(event) => handleMenuClick(event, row)}
-                      sx={{ textTransform: "none" }}
-                    >
-                      Action
-                    </Button>
+                      <VisibilityIcon sx={{ color: uiColors.navy }} />
+                    </IconButton>
+                  </Badge>
+                </CenteredTableCell>
+                <CenteredTableCell>
+                  <Button
+                    variant="contained"
+                    onClick={(event) => handleMenuClick(event, row)}
+                    sx={{
+                      textTransform: "none",
+                      backgroundColor: uiColors.navy,
+                      "&:hover": { backgroundColor: uiColors.navyHover },
+                    }}
+                  >
+                    Action
+                  </Button>
                     <Menu
                       anchorEl={anchorEl}
                       open={Boolean(anchorEl) && currentRow === row}

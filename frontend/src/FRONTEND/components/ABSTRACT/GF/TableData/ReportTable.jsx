@@ -570,62 +570,120 @@ workbook.xlsx.writeBuffer().then(buffer => {
 
   return (
     <>
-      <Box sx={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        mt: 2,
-        mb: 4,
-        p: 3,
-        bgcolor: 'background.paper',
-        borderRadius: 2,
-        boxShadow: 1
-      }}>
-    <Button 
-      variant="contained" 
-      startIcon={<ArrowBackIcon />}
-      onClick={onBack}
-      sx={{ 
-        borderRadius: '8px',
-        textTransform: 'none',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        '&:hover': { boxShadow: '0 4px 8px rgba(0,0,0,0.15)' }
-      }}
-    >
-      Back
-    </Button>
-    
-    <Box display="flex" gap={2}>
-      <Autocomplete
-        disablePortal
-        id="month-selector"
-        options={months}
-        sx={{ 
-          width: 180,
-          '& .MuiInputBase-root': { borderRadius: '8px' }
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mt: 2,
+          mb: 4,
+          p: 3,
+          bgcolor: "background.paper",
+          borderRadius: 3,
+          border: "1px solid #d6a12b",
+          boxShadow: "0 8px 20px rgba(15, 23, 42, 0.08)",
+          gap: 2,
+          flexWrap: "wrap",
         }}
-        onChange={handleMonthChange}
-        value={month}
-        renderInput={(params) => 
-          <TextField {...params} label="Select Month" variant="outlined" />
-        }
-      />
-      <Autocomplete
-        disablePortal
-        id="year-selector"
-        options={years}
-        sx={{ 
-          width: 180,
-          '& .MuiInputBase-root': { borderRadius: '8px' }
-        }}
-        onChange={handleYearChange}
-        value={year}
-        renderInput={(params) => 
-          <TextField {...params} label="Select Year" variant="outlined" />
-        }
-      />
-    </Box>
-  </Box>
+      >
+        <Button
+          variant="contained"
+          startIcon={<ArrowBackIcon />}
+          onClick={onBack}
+          sx={{
+            borderRadius: "8px",
+            textTransform: "none",
+            fontWeight: 700,
+            backgroundColor: "#0f2747",
+            boxShadow: "0 4px 10px rgba(15, 39, 71, 0.25)",
+            "&:hover": {
+              backgroundColor: "#0b1e38",
+              boxShadow: "0 6px 14px rgba(15, 39, 71, 0.35)",
+            },
+          }}
+        >
+          Back
+        </Button>
+
+        <Box display="flex" gap={2} flexWrap="wrap">
+          <Autocomplete
+            disablePortal
+            id="month-selector"
+            options={months}
+            sx={{
+              width: 180,
+              "& .MuiInputBase-root": { borderRadius: "8px" },
+            }}
+            onChange={handleMonthChange}
+            value={month}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Select Month"
+                variant="outlined"
+                sx={{
+                  "& .MuiInputBase-input": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.divider,
+                  },
+                  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.primary,
+                  },
+                }}
+              />
+            )}
+          />
+          <Autocomplete
+            disablePortal
+            id="year-selector"
+            options={years}
+            sx={{
+              width: 180,
+              "& .MuiInputBase-root": { borderRadius: "8px" },
+            }}
+            onChange={handleYearChange}
+            value={year}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Select Year"
+                variant="outlined"
+                sx={{
+                  "& .MuiInputBase-input": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.divider,
+                  },
+                  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.primary,
+                  },
+                }}
+              />
+            )}
+          />
+        </Box>
+      </Box>
 
   <div id="printableArea">
     <Box>
@@ -1458,45 +1516,56 @@ workbook.xlsx.writeBuffer().then(buffer => {
                 mb: 4,
                 p: 3,
                 bgcolor: "background.paper",
-                borderRadius: 2,
-                boxShadow: 1,
+                borderRadius: 3,
+                border: "1px solid #d6a12b",
+                boxShadow: "0 8px 20px rgba(15, 23, 42, 0.08)",
+                gap: 2,
+                flexWrap: "wrap",
               }}
             >
               <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handlePrint}
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    textTransform: "none",
-                    borderRadius: "12px",
-                    padding: "10px 20px",
-                    fontWeight: 600,
-                    "&:hover": { backgroundColor: "secondary.main" },
-                  }}
-                  startIcon={<PrintIcon />}
-                >
+                variant="contained"
+                onClick={handlePrint}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  textTransform: "none",
+                  borderRadius: "10px",
+                  padding: "10px 22px",
+                  fontWeight: 700,
+                  backgroundColor: "#0f2747",
+                  boxShadow: "0 4px 10px rgba(15, 39, 71, 0.25)",
+                  "&:hover": {
+                    backgroundColor: "#0b1e38",
+                    boxShadow: "0 6px 14px rgba(15, 39, 71, 0.35)",
+                  },
+                }}
+                startIcon={<PrintIcon />}
+              >
                 PRINT
               </Button>
-              
+
               <Button
-    variant="outlined"
-    color="success"
-    onClick={handleDownloadExcel}
-    sx={{
-      display: "flex",
-      alignItems: "center",
-      gap: 1,
-      textTransform: "none",
-      borderRadius: "12px",
-      padding: "10px 20px",
-      fontWeight: 600,
-      "&:hover": { backgroundColor: "success.light" },
-    }}
-    startIcon={<FileDownloadIcon />}
-  >
+                variant="outlined"
+                onClick={handleDownloadExcel}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  textTransform: "none",
+                  borderRadius: "10px",
+                  padding: "10px 22px",
+                  fontWeight: 700,
+                  borderColor: "#0f2747",
+                  color: "#0f2747",
+                  "&:hover": {
+                    borderColor: "#0b1e38",
+                    backgroundColor: "rgba(15, 39, 71, 0.08)",
+                  },
+                }}
+                startIcon={<FileDownloadIcon />}
+              >
                 Download to Excel
               </Button>
             </Box>

@@ -30,13 +30,19 @@ import { useEffect, useMemo, useState } from "react";
 import axiosInstance from "../../../../../api/axiosInstance";
 import CommentsDialog from "../../RPT/TableData/CommentsDialog";
 import DailyTablev2 from "./components/Table/DailyTable";
+import { useMaterialUIController } from "../../../../../context";
 
 // Styled components
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  backgroundColor: theme.palette.primary.main,
-  color: theme.palette.common.white,
-  fontWeight: "bold",
+const StyledTableCell = styled(TableCell)(() => ({
+  whiteSpace: "nowrap",
+  fontWeight: 700,
   textAlign: "center",
+  textTransform: "uppercase",
+  letterSpacing: "1px",
+  fontSize: 11.5,
+  background: "#f7f9fc",
+  color: "#0f2747",
+  borderBottom: "2px solid #d6a12b",
 }));
 
 const RightAlignedTableCell = styled(TableCell)({
@@ -92,6 +98,16 @@ const formatDate = (dateInput) => {
 };
 
 function DailyTable({ onDataFiltered, onBack }) {
+  const [controller] = useMaterialUIController();
+  const { darkMode } = controller;
+  const uiColors = useMemo(
+    () => ({
+      navy: darkMode ? "#4f7bb5" : "#0f2747",
+      navyHover: darkMode ? "#3f6aa3" : "#0b1e38",
+      bg: darkMode ? "#0f1117" : "#f5f7fb",
+    }),
+    [darkMode]
+  );
   const [data, setData] = useState([]);
   const currentYear = new Date().getFullYear();
   const [selectedMonth, setSelectedMonth] = useState("");
@@ -241,12 +257,15 @@ function DailyTable({ onDataFiltered, onBack }) {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          gap: 2,
+          flexWrap: "wrap",
           mt: 2,
           mb: 4,
           p: 3,
           bgcolor: "background.paper",
-          borderRadius: 2,
-          boxShadow: 1,
+          borderRadius: 3,
+          border: "1px solid #d6a12b",
+          boxShadow: "0 8px 20px rgba(15, 23, 42, 0.08)",
         }}
       >
         <Button
@@ -256,8 +275,13 @@ function DailyTable({ onDataFiltered, onBack }) {
           sx={{
             borderRadius: "8px",
             textTransform: "none",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-            "&:hover": { boxShadow: "0 4px 8px rgba(0,0,0,0.15)" },
+            fontWeight: 700,
+            backgroundColor: uiColors.navy,
+            boxShadow: "0 4px 10px rgba(15, 39, 71, 0.25)",
+            "&:hover": {
+              backgroundColor: uiColors.navyHover,
+              boxShadow: "0 6px 14px rgba(15, 39, 71, 0.35)",
+            },
           }}
         >
           Back
@@ -267,14 +291,14 @@ function DailyTable({ onDataFiltered, onBack }) {
           variant="h4"
           sx={{
             fontWeight: 700,
-            color: "primary.main",
+            color: uiColors.navy,
             letterSpacing: 1,
           }}
         >
           Daily Collections
         </Typography>
 
-        <Box display="flex" gap={2} alignItems="center">
+        <Box display="flex" gap={2} alignItems="center" flexWrap="wrap">
           <Autocomplete
             disablePortal
             id="month-selector"
@@ -283,9 +307,34 @@ function DailyTable({ onDataFiltered, onBack }) {
               months.find((m) => String(m.value) === String(selectedMonth)) ||
               null
             }
-            sx={{ width: 150 }}
+            sx={{ width: { xs: "100%", sm: 150 } }}
             onChange={handleMonthChange}
-            renderInput={(params) => <TextField {...params} label="Month" />}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Month"
+                sx={{
+                  "& .MuiInputBase-input": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.divider,
+                  },
+                  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.primary,
+                  },
+                }}
+              />
+            )}
           />
           <Autocomplete
             disablePortal
@@ -295,9 +344,34 @@ function DailyTable({ onDataFiltered, onBack }) {
               years.find((y) => String(y.value) === String(selectedYear)) ||
               null
             }
-            sx={{ width: 150 }}
+            sx={{ width: { xs: "100%", sm: 150 } }}
             onChange={handleYearChange}
-            renderInput={(params) => <TextField {...params} label="Year" />}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Year"
+                sx={{
+                  "& .MuiInputBase-input": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.divider,
+                  },
+                  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.primary,
+                  },
+                }}
+              />
+            )}
           />
         </Box>
       </Box>
@@ -308,6 +382,7 @@ function DailyTable({ onDataFiltered, onBack }) {
         sx={{
           borderRadius: 4,
           boxShadow: 3,
+          backgroundColor: (theme) => theme.palette.background.paper,
           "& .MuiTableCell-root": { py: 2 },
         }}
       >
@@ -366,7 +441,7 @@ function DailyTable({ onDataFiltered, onBack }) {
                         handleViewComments(dayjs(row.DATE).format("YYYY-MM-DD"))
                       }
                     >
-                      <VisibilityIcon color="primary" />
+                      <VisibilityIcon sx={{ color: uiColors.navy }} />
                     </IconButton>
                   </Badge>
                 </CenteredTableCell>
@@ -374,9 +449,12 @@ function DailyTable({ onDataFiltered, onBack }) {
                 <CenteredTableCell>
                   <Button
                     variant="contained"
-                    color="primary"
                     onClick={(event) => handleClick(event, row)}
-                    sx={{ textTransform: "none" }}
+                    sx={{
+                      textTransform: "none",
+                      backgroundColor: uiColors.navy,
+                      "&:hover": { backgroundColor: uiColors.navyHover },
+                    }}
                   >
                     Action
                   </Button>

@@ -3,7 +3,8 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import PropTypes from "prop-types";
 import React from "react";
-import { Button } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
 function PopupDialog({ onClose, children }) {
   return (
@@ -17,40 +18,83 @@ function PopupDialog({ onClose, children }) {
           width: "min(98vw, 1220px)",
           maxWidth: "1220px",
           margin: { xs: 1, sm: 2 },
-          backgroundColor: "#f5f5f5", // Light gray background
-          color: "#333", // Dark text color
-          borderRadius: "12px", // Rounded corners
-          boxShadow: "0px 5px 15px rgba(0, 0, 0, 0.2)", // Soft shadow effect
+          borderRadius: "16px",
+          border: "1px solid #d6a12b",
+          boxShadow: "0 20px 40px rgba(10, 18, 30, 0.35)",
+          overflow: "hidden",
         },
       }}
     >
       <DialogTitle
         sx={{
-          backgroundColor: "#0080A7", // Dark blue header
+          p: { xs: 2, sm: 2.5 },
+          background: "linear-gradient(135deg, #0b1f33 0%, #17324f 55%, #1f3d5e 100%)",
           color: "#fff",
-          fontSize: "1.2rem",
-          fontWeight: "bold",
           display: "flex",
-          justifyContent: "space-between",
           alignItems: "center",
-          padding: "12px 24px",
+          justifyContent: "space-between",
+          gap: 2,
         }}
       >
-        Community Tax Certificate Form
-        <Button onClick={onClose} variant="contained" color="error">
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Box>
+            <Typography variant="overline" sx={{ letterSpacing: 2, color: "#f5e7c1" }}>
+              Community Tax Certificate
+            </Typography>
+            <Typography variant="h6" sx={{ fontWeight: 800, letterSpacing: 0.4 }}>
+              Cedula Form • Official Use
+            </Typography>
+            <Typography variant="body2" sx={{ opacity: 0.85, color: "#e3ecf7" }}>
+              Office of the Treasurer
+            </Typography>
+          </Box>
+          <Box
+            sx={{
+              width: 70,
+              height: 70,
+              borderRadius: "50%",
+              display: "grid",
+              placeItems: "center",
+              overflow: "hidden",
+              backgroundColor: "rgba(255,255,255,0.06)",
+            }}
+          >
+            <Box
+              component="img"
+              src="/assets/images/TreasurerPNG.png"
+              alt="Treasurer Seal"
+              sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          </Box>
+        </Box>
+        <Button
+          onClick={onClose}
+          variant="outlined"
+          startIcon={<CloseIcon />}
+          sx={{
+            color: "#f8e1a6",
+            borderColor: "#d6a12b",
+            textTransform: "none",
+            fontWeight: 700,
+            "&:hover": {
+              borderColor: "#f2cf74",
+              backgroundColor: "rgba(214, 161, 43, 0.12)",
+            },
+          }}
+        >
           Close
         </Button>
       </DialogTitle>
 
       <DialogContent
         sx={{
-          p: { xs: 1, sm: 2 },
+          p: { xs: 2, sm: 2.5 },
+          backgroundColor: "#f7f9fc",
           overflowX: "auto",
         }}
       >
         {children}
       </DialogContent>
-      
     </Dialog>
   );
 }

@@ -33,11 +33,16 @@ import DailyTablev2 from './components/Table/DailyTable';
 
 
 // Styled components for the table cells
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  backgroundColor: theme.palette.primary.main,
-  color: theme.palette.common.white,
-  fontWeight: 'bold',
-  textAlign: 'center',
+const StyledTableCell = styled(TableCell)(() => ({
+  whiteSpace: "nowrap",
+  fontWeight: 700,
+  textAlign: "center",
+  textTransform: "uppercase",
+  letterSpacing: "1px",
+  fontSize: 11.5,
+  background: "#f7f9fc",
+  color: "#0f2747",
+  borderBottom: "2px solid #d6a12b",
 }));
 
 const RightAlignedTableCell = styled(TableCell)({
@@ -222,69 +227,141 @@ function DailyTable({ onDataFiltered, onBack }) {
   return (
     <>
       {/* Month and Year selectors */}
-      <Box sx={{
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      mt: 2,
-      mb: 4,
-      p: 3,
-      bgcolor: 'background.paper',
-      borderRadius: 2,
-      boxShadow: 1
-    }}>
-      <Button 
-      variant="contained" 
-      startIcon={<ArrowBackIcon />}
-      onClick={onBack}
-      sx={{ 
-        borderRadius: '8px',
-        textTransform: 'none',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        '&:hover': { boxShadow: '0 4px 8px rgba(0,0,0,0.15)' }
-      }}
-    >
-        Back
-      </Button>
-      
-      <Typography variant="h4" sx={{ 
-        fontWeight: 700,
-        color: 'primary.main',
-        letterSpacing: 1
-      }}>
-        Daily Collections
-      </Typography>
-      
-      <Box display="flex" gap={2} alignItems="center">
-      <Autocomplete
-      disablePortal
-      id="month-selector"
-      options={months}
-      sx={{ width: 150, mr: 2 }}
-      onChange={handleMonthChange}
-      renderInput={(params) => <TextField {...params} label="Month" />}
-    />
-    <Autocomplete
-      disablePortal
-      id="year-selector"
-      options={years}
-      sx={{ width: 150 }}
-      onChange={handleYearChange}
-      renderInput={(params) => <TextField {...params} label="Year" />}
-    />
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mt: 2,
+          mb: 4,
+          p: 3,
+          bgcolor: "background.paper",
+          borderRadius: 3,
+          border: "1px solid #d6a12b",
+          boxShadow: "0 8px 20px rgba(15, 23, 42, 0.08)",
+          gap: 2,
+          flexWrap: "wrap",
+        }}
+      >
+        <Button
+          variant="contained"
+          startIcon={<ArrowBackIcon />}
+          onClick={onBack}
+          sx={{
+            borderRadius: "8px",
+            textTransform: "none",
+            fontWeight: 700,
+            backgroundColor: "#0f2747",
+            boxShadow: "0 4px 10px rgba(15, 39, 71, 0.25)",
+            "&:hover": {
+              backgroundColor: "#0b1e38",
+              boxShadow: "0 6px 14px rgba(15, 39, 71, 0.35)",
+            },
+          }}
+        >
+          Back
+        </Button>
+
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 700,
+            color: "#0f2747",
+            letterSpacing: 1,
+            textTransform: "uppercase",
+          }}
+        >
+          Daily Collections
+        </Typography>
+
+        <Box display="flex" gap={2} alignItems="center" flexWrap="wrap">
+          <Autocomplete
+            disablePortal
+            id="month-selector"
+            options={months}
+            sx={{
+              width: 150,
+              "& .MuiInputBase-root": { borderRadius: "8px" },
+            }}
+            onChange={handleMonthChange}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Month"
+                variant="outlined"
+                sx={{
+                  "& .MuiInputBase-input": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.divider,
+                  },
+                  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.primary,
+                  },
+                }}
+              />
+            )}
+          />
+          <Autocomplete
+            disablePortal
+            id="year-selector"
+            options={years}
+            sx={{
+              width: 150,
+              "& .MuiInputBase-root": { borderRadius: "8px" },
+            }}
+            onChange={handleYearChange}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Year"
+                variant="outlined"
+                sx={{
+                  "& .MuiInputBase-input": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.divider,
+                  },
+                  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.primary,
+                  },
+                }}
+              />
+            )}
+          />
+        </Box>
       </Box>
-    </Box>
 
 
       {/* Table display */}
-      <TableContainer 
+      <TableContainer
         component={Paper}
         sx={{
           borderRadius: 4,
           boxShadow: 3,
-          '& .MuiTableCell-root': {
-            py: 2
-          }
+          "& .MuiTableCell-root": {
+            py: 2,
+          },
         }}
       >
       <Table aria-label="daily data table">

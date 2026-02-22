@@ -114,8 +114,10 @@ export default function SignIn() {
 
     try {
       await axios.post(`${process.env.REACT_APP_API_URL}login`, payload);
+      localStorage.setItem("isAuthenticated", "true");
       navigate("/my-app");
     } catch (error) {
+      localStorage.removeItem("isAuthenticated");
       setLoginError(error.response?.data?.message || "Invalid credentials. Please try again.");
       console.error(error);
     } finally {

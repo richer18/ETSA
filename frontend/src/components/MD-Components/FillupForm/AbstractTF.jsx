@@ -4,13 +4,12 @@ import {
   Alert,
   Button,
   Col,
-  Container,
   Form,
   InputGroup,
   ProgressBar,
   Row,
 } from "react-bootstrap";
-import { FaTrash } from "react-icons/fa";
+import { FaCalendarAlt, FaCashRegister, FaFileInvoice, FaIdCard, FaListAlt, FaPlus, FaSave, FaTrash, FaUser, FaUsers } from "react-icons/fa";
 import axiosInstance from "../../../api/axiosInstance";
 // Static Field Definitions
 const fieldOptions = [
@@ -63,6 +62,24 @@ const fieldConfigs = {
     label: "Zoning Fee",
     percentages: [],
   },
+};
+
+const uiColors = {
+  navy: "#0f2747",
+  navyHover: "#0b1e38",
+  amber: "#d6a12b",
+  amberSoft: "rgba(214, 161, 43, 0.12)",
+  border: "#d8e2ee",
+  bg: "#f7f9fc",
+  card: "#ffffff",
+  textMuted: "#5b7088",
+};
+
+const labelStyle = { fontWeight: 600, color: uiColors.navy };
+const inputStyle = {
+  borderRadius: "10px",
+  borderColor: uiColors.border,
+  boxShadow: "none",
 };
 
 
@@ -240,8 +257,14 @@ function AbstractTF({ data, mode, refreshData }) {
   }, [data, mode]);
 
   return (
-    <Container>
-      <h4 className="mb-4 text-center">
+    <div
+      style={{
+        background: "transparent",
+        padding: 0,
+        boxShadow: "none",
+      }}
+    >
+      <h4 className="mb-4 text-center" style={{ color: uiColors.navy, fontWeight: 800 }}>
         Trust Fund Abstracts ({mode === "edit" ? "Edit" : "Add"})
       </h4>
       <Form
@@ -252,59 +275,79 @@ function AbstractTF({ data, mode, refreshData }) {
         <Row className="g-3 mb-4">
           <Col md={12}>
             <Form.Group controlId="formDate">
-              <Form.Label>Date</Form.Label>
+              <Form.Label style={labelStyle}>
+                <FaCalendarAlt style={{ marginRight: 8 }} />
+                Date
+              </Form.Label>
               <Form.Control
                 type="date"
                 value={selectedDate || ""}
                 onChange={(e) => setSelectedDate(e.target.value)}
                 required
+                style={inputStyle}
               />
             </Form.Group>
           </Col>
 
           <Col md={12}>
             <Form.Group controlId="formTaxpayer">
-              <Form.Label>Name of Taxpayer</Form.Label>
+              <Form.Label style={labelStyle}>
+                <FaUser style={{ marginRight: 8 }} />
+                Name of Taxpayer
+              </Form.Label>
               <Form.Control
                 type="text"
                 value={taxpayerName}
                 onChange={(e) => setTaxpayerName(e.target.value)}
                 required
+                style={inputStyle}
               />
             </Form.Group>
           </Col>
 
           <Col md={12}>
             <Form.Group controlId="formReceipt">
-              <Form.Label>Receipt No. P.F. No. 25(A)</Form.Label>
+              <Form.Label style={labelStyle}>
+                <FaFileInvoice style={{ marginRight: 8 }} />
+                Receipt No. P.F. No. 25(A)
+              </Form.Label>
               <Form.Control
                 type="text"
                 value={receiptNumber}
                 onChange={(e) => setReceiptNumber(e.target.value)}
                 required
+                style={inputStyle}
               />
             </Form.Group>
           </Col>
 
           <Col md={12}>
             <Form.Group controlId="formReceiptType">
-              <Form.Label>Type of Receipt</Form.Label>
+              <Form.Label style={labelStyle}>
+                <FaIdCard style={{ marginRight: 8 }} />
+                Type of Receipt
+              </Form.Label>
               <Form.Control
                 type="text"
                 value={typeReceipt}
                 onChange={(e) => setTypeReceipt(e.target.value)}
                 required
+                style={inputStyle}
               />
             </Form.Group>
           </Col>
 
           <Col md={12}>
             <Form.Group controlId="formCashier">
-              <Form.Label>Select Cashier</Form.Label>
+              <Form.Label style={labelStyle}>
+                <FaUsers style={{ marginRight: 8 }} />
+                Select Cashier
+              </Form.Label>
               <Form.Select
                 value={selectedCashier}
                 onChange={(e) => setSelectedCashier(e.target.value)}
                 required
+                style={inputStyle}
               >
                 {cashier.map((name) => (
                   <option key={name} value={name}>
@@ -325,13 +368,17 @@ function AbstractTF({ data, mode, refreshData }) {
             return (
               <Col md={12} key={field}>
                 <Form.Group controlId={`form-${field}`}>
-                  <Form.Label>{config.label}</Form.Label>
+                  <Form.Label style={labelStyle}>
+                    <FaListAlt style={{ marginRight: 8 }} />
+                    {config.label}
+                  </Form.Label>
                   <InputGroup>
                     <Form.Control
                       type="number"
                       value={rawValue}
                       onChange={(e) => handleFieldChange(field, e.target.value)}
                       required
+                      style={inputStyle}
                     />
                     <Button
                       variant="outline-danger"
@@ -363,7 +410,14 @@ function AbstractTF({ data, mode, refreshData }) {
               variant="primary"
               onClick={() => setShowSelect(true)}
               className="mt-2"
+              style={{
+                backgroundColor: uiColors.navy,
+                borderColor: uiColors.navy,
+                fontWeight: 700,
+                textTransform: "none",
+              }}
             >
+              <FaPlus style={{ marginRight: 8 }} />
               Add New Field
             </Button>
           </Col>
@@ -371,7 +425,10 @@ function AbstractTF({ data, mode, refreshData }) {
           {showSelect && (
             <Col md={12}>
               <Form.Group controlId="formSelectField">
-                <Form.Label>Select Field to Add</Form.Label>
+                <Form.Label style={labelStyle}>
+                  <FaListAlt style={{ marginRight: 8 }} />
+                  Select Field to Add
+                </Form.Label>
                 <Form.Select
                   value={selectedField}
                   onChange={(e) => {
@@ -383,6 +440,7 @@ function AbstractTF({ data, mode, refreshData }) {
                     setSelectedField("");
                     setShowSelect(false);
                   }}
+                  style={inputStyle}
                 >
                   <option value="">-- Select Field --</option>
                   {fieldOptions
@@ -398,7 +456,10 @@ function AbstractTF({ data, mode, refreshData }) {
           )}
 
           <Col md={12}>
-            <h5 className="mt-3">Total: ₱{total.toFixed(2)}</h5>
+            <h5 className="mt-3" style={{ color: uiColors.navy, fontWeight: 700 }}>
+              <FaCashRegister style={{ marginRight: 8 }} />
+              Total: ₱{total.toFixed(2)}
+            </h5>
           </Col>
         </Row>
 
@@ -417,24 +478,45 @@ function AbstractTF({ data, mode, refreshData }) {
           />
         )}
 
-        <div className="d-flex justify-content-end mt-4">
+        <div className="d-flex w-100 mt-4 gap-2">
           <Button
             variant="secondary"
             onClick={handleClearFields}
-            className="me-2"
+            className="flex-fill"
+            style={{
+              borderColor: uiColors.amber,
+              color: uiColors.navy,
+              backgroundColor: "rgba(214, 161, 43, 0.08)",
+              fontWeight: 700,
+              textTransform: "none",
+              padding: "10px 18px",
+              borderRadius: "10px",
+            }}
           >
+            <FaTrash style={{ marginRight: 8 }} />
             Reset
           </Button>
           <Button
             variant="primary"
             type="button" // ✅ prevent form submit
-            onClick={handleSave} // ✅ only triggers save once
+            onClick={handleSave}
+            className="flex-fill"
+            style={{
+              backgroundColor: uiColors.navy,
+              borderColor: uiColors.navy,
+              fontWeight: 700,
+              textTransform: "none",
+              padding: "10px 22px",
+              borderRadius: "10px",
+              boxShadow: "0 6px 14px rgba(15, 39, 71, 0.25)",
+            }}
           >
+            <FaSave style={{ marginRight: 8 }} />
             {mode === "edit" ? "Update" : "Save"}
           </Button>
         </div>
       </Form>
-    </Container>
+    </div>
   );
 }
 

@@ -20,10 +20,16 @@ import { useCallback, useEffect, useState } from "react";
 import axios from "../../../../../api/axiosInstance";
 
 // Custom styles
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  fontWeight: "bold",
-  backgroundColor: theme.palette.primary.main,
-  color: theme.palette.common.white,
+const StyledTableCell = styled(TableCell)(() => ({
+  whiteSpace: "nowrap",
+  fontWeight: 700,
+  textAlign: "center",
+  textTransform: "uppercase",
+  letterSpacing: "0.8px",
+  fontSize: 11.5,
+  background: "#f7f9fc",
+  color: "#0f2747",
+  borderBottom: "2px solid #d6a12b",
 }));
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
@@ -32,12 +38,15 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-const TotalBox = styled(Box)(({ theme }) => ({
-  marginTop: theme.spacing(2),
-  marginBottom: theme.spacing(2),
-  padding: theme.spacing(2),
-  backgroundColor: theme.palette.secondary.main,
-  borderRadius: theme.shape.borderRadius,
+const TotalBox = styled(Box)(() => ({
+  marginTop: 16,
+  marginBottom: 16,
+  padding: 16,
+  background: "linear-gradient(135deg, #0f2747, #2f4f7f)",
+  color: "#ffffff",
+  border: "1px solid #d6a12b",
+  borderRadius: 12,
+  boxShadow: "0 6px 16px rgba(15, 39, 71, 0.18)",
 }));
 
 // Constants for months, days, and years
@@ -188,22 +197,42 @@ function Summary({ setMonth, setYear, onBack }) {
         : "0";
   };
 
+  const tableCardSx = {
+    mb: 2,
+    borderRadius: 3,
+    border: "1px solid #d6a12b",
+    overflow: "hidden",
+    boxShadow: "0 8px 20px rgba(15, 23, 42, 0.08)",
+    "& .MuiTableCell-root": {
+      py: 1.35,
+      px: 1.6,
+    },
+  };
+
+  const sectionTitleSx = {
+    fontWeight: 700,
+    color: "#0f2747",
+    letterSpacing: 0.3,
+  };
+
   return (
-    <div>
+    <Box sx={{ px: { xs: 1, md: 2 }, pb: 4 }}>
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between", // Ensure proper alignment
+          justifyContent: "space-between",
           mt: 2,
-          mb: 4,
-          p: 3,
+          mb: 5,
+          p: { xs: 2.5, md: 4 },
           bgcolor: "background.paper",
-          borderRadius: 2,
-          boxShadow: 1,
+          borderRadius: 3,
+          border: "1px solid #d6a12b",
+          boxShadow: "0 8px 20px rgba(15, 23, 42, 0.08)",
+          gap: 2,
+          flexWrap: "wrap",
         }}
       >
-        {/* Left Section - Back Button */}
         <Button
           variant="contained"
           startIcon={<ArrowBackIcon />}
@@ -211,71 +240,163 @@ function Summary({ setMonth, setYear, onBack }) {
           sx={{
             borderRadius: "8px",
             textTransform: "none",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-            "&:hover": { boxShadow: "0 4px 8px rgba(0,0,0,0.15)" },
+            fontWeight: 700,
+            backgroundColor: "#0f2747",
+            boxShadow: "0 4px 10px rgba(15, 39, 71, 0.25)",
+            "&:hover": {
+              backgroundColor: "#0b1e38",
+              boxShadow: "0 6px 14px rgba(15, 39, 71, 0.35)",
+            },
           }}
         >
           Back
         </Button>
-        {/* Center Section - Title */}
+
         <Typography
           variant="h4"
           sx={{
             fontWeight: 700,
-            color: "primary.main",
+            color: "#0f2747",
             letterSpacing: 1,
+            textTransform: "uppercase",
           }}
         >
           Summary
         </Typography>
-        {/* Right Section - Date Selectors */}
-        <Box display="flex" alignItems="center" gap={2}>
+
+        <Box display="flex" alignItems="center" gap={2} flexWrap="wrap">
           <Autocomplete
             disablePortal
             id="month-selector"
             options={months}
-            sx={{ width: 150 }}
+            sx={{
+              width: 150,
+              "& .MuiInputBase-root": { borderRadius: "8px" },
+            }}
             onChange={(_, value) =>
               setMonthInternal(value ? value.value : null)
             }
             renderInput={(params) => (
-              <TextField {...params} label="Month" variant="outlined" />
+              <TextField
+                {...params}
+                label="Month"
+                variant="outlined"
+                sx={{
+                  "& .MuiInputBase-input": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.divider,
+                  },
+                  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.primary,
+                  },
+                }}
+              />
             )}
           />
           <Autocomplete
             disablePortal
             id="day-selector"
             options={days}
-            sx={{ width: 150 }}
+            sx={{
+              width: 150,
+              "& .MuiInputBase-root": { borderRadius: "8px" },
+            }}
             onChange={(_, value) => setDayInternal(value ? value.value : null)}
             renderInput={(params) => (
-              <TextField {...params} label="Day" variant="outlined" />
+              <TextField
+                {...params}
+                label="Day"
+                variant="outlined"
+                sx={{
+                  "& .MuiInputBase-input": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.divider,
+                  },
+                  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.primary,
+                  },
+                }}
+              />
             )}
           />
           <Autocomplete
             disablePortal
             id="year-selector"
             options={years}
-            sx={{ width: 150 }}
+            sx={{
+              width: 150,
+              "& .MuiInputBase-root": { borderRadius: "8px" },
+            }}
             onChange={(_, value) => setYearInternal(value ? value.value : null)}
             renderInput={(params) => (
-              <TextField {...params} label="Year" variant="outlined" />
+              <TextField
+                {...params}
+                label="Year"
+                variant="outlined"
+                sx={{
+                  "& .MuiInputBase-input": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.divider,
+                  },
+                  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.primary,
+                  },
+                }}
+              />
             )}
           />
         </Box>
       </Box>
 
-      <Grid container spacing={4}>
+      <Grid
+        container
+        spacing={{ xs: 3, md: 5 }}
+        justifyContent="space-between"
+        alignItems="flex-start"
+      >
         {/* BASIC SECTION */}
-        <Grid item xs={12} md={6}>
-          <Box sx={{ padding: 2 }}>
-            <Typography variant="h5" gutterBottom color="primary">
+        <Grid item xs={12} md={6} sx={{ display: "flex", justifyContent: "flex-start" }}>
+          <Box sx={{ p: { xs: 2, md: 3 }, width: "100%" }}>
+            <Typography variant="h5" gutterBottom sx={sectionTitleSx}>
               Basic
             </Typography>
             <Divider sx={{ mb: 2 }} />
 
             {/* LAND TABLE */}
-            <TableContainer component={Paper} sx={{ mb: 2 }}>
+            <TableContainer component={Paper} sx={tableCardSx}>
               <Table aria-label="basic land table">
                 <TableHead>
                   <TableRow>
@@ -339,7 +460,7 @@ function Summary({ setMonth, setYear, onBack }) {
             </TableContainer>
 
             {/* BUILDING TABLE */}
-            <TableContainer component={Paper} sx={{ mb: 2 }}>
+            <TableContainer component={Paper} sx={tableCardSx}>
               <Table aria-label="basic building table">
                 <TableHead>
                   <TableRow>
@@ -410,11 +531,11 @@ function Summary({ setMonth, setYear, onBack }) {
             </TotalBox>
 
             {/* LAND SHARING */}
-            <Typography variant="h5" gutterBottom color="primary">
+            <Typography variant="h5" gutterBottom sx={sectionTitleSx}>
               Land Sharing
             </Typography>
             <Divider sx={{ mb: 2 }} />
-            <TableContainer component={Paper} sx={{ mb: 2 }}>
+            <TableContainer component={Paper} sx={tableCardSx}>
               <Table aria-label="land sharing table">
                 <TableHead>
                   <TableRow>
@@ -493,11 +614,11 @@ function Summary({ setMonth, setYear, onBack }) {
             </TableContainer>
 
             {/* BUILDING SHARING */}
-            <Typography variant="h5" gutterBottom color="primary">
+            <Typography variant="h5" gutterBottom sx={sectionTitleSx}>
               Building Sharing
             </Typography>
             <Divider sx={{ mb: 2 }} />
-            <TableContainer component={Paper} sx={{ mb: 2 }}>
+            <TableContainer component={Paper} sx={tableCardSx}>
               <Table aria-label="building sharing table">
                 <TableHead>
                   <TableRow>
@@ -554,7 +675,7 @@ function Summary({ setMonth, setYear, onBack }) {
             </TotalBox>
 
             {/* OVERALL TOTAL */}
-            <Typography variant="h5" gutterBottom color="primary">
+            <Typography variant="h5" gutterBottom sx={sectionTitleSx}>
               Overall Total for Basic and SEF
             </Typography>
             <TotalBox>
@@ -566,15 +687,15 @@ function Summary({ setMonth, setYear, onBack }) {
         </Grid>
 
         {/* SEF SECTION */}
-        <Grid item xs={12} md={6}>
-          <Box sx={{ padding: 2 }}>
-            <Typography variant="h5" gutterBottom color="primary">
+        <Grid item xs={12} md={6} sx={{ display: "flex", justifyContent: "flex-end" }}>
+          <Box sx={{ p: { xs: 2, md: 3 }, width: "100%" }}>
+            <Typography variant="h5" gutterBottom sx={sectionTitleSx}>
               SEF
             </Typography>
             <Divider sx={{ mb: 2 }} />
 
             {/* SEF LAND TABLE */}
-            <TableContainer component={Paper} sx={{ mb: 2 }}>
+            <TableContainer component={Paper} sx={tableCardSx}>
               <Table aria-label="sef land table">
                 <TableHead>
                   <TableRow>
@@ -638,7 +759,7 @@ function Summary({ setMonth, setYear, onBack }) {
             </TableContainer>
 
             {/* SEF BUILDING TABLE */}
-            <TableContainer component={Paper} sx={{ mb: 2 }}>
+            <TableContainer component={Paper} sx={tableCardSx}>
               <Table aria-label="sef building table">
                 <TableHead>
                   <TableRow>
@@ -710,11 +831,11 @@ function Summary({ setMonth, setYear, onBack }) {
             </TotalBox>
 
             {/* SEF LAND SHARING */}
-            <Typography variant="h5" gutterBottom color="primary">
+            <Typography variant="h5" gutterBottom sx={sectionTitleSx}>
               SEF Land Sharing
             </Typography>
             <Divider sx={{ mb: 2 }} />
-            <TableContainer component={Paper} sx={{ mb: 2 }}>
+            <TableContainer component={Paper} sx={tableCardSx}>
               <Table aria-label="sef land sharing table">
                 <TableHead>
                   <TableRow>
@@ -779,11 +900,11 @@ function Summary({ setMonth, setYear, onBack }) {
             </TableContainer>
 
             {/* SEF BUILDING SHARING */}
-            <Typography variant="h5" gutterBottom color="primary">
+            <Typography variant="h5" gutterBottom sx={sectionTitleSx}>
               SEF Building Sharing
             </Typography>
             <Divider sx={{ mb: 2 }} />
-            <TableContainer component={Paper} sx={{ mb: 2 }}>
+            <TableContainer component={Paper} sx={tableCardSx}>
               <Table aria-label="sef building sharing table">
                 <TableHead>
                   <TableRow>
@@ -834,7 +955,7 @@ function Summary({ setMonth, setYear, onBack }) {
             </TotalBox>
 
             {/* OVERALL TOTAL FOR SHARING */}
-            <Typography variant="h5" gutterBottom color="primary">
+            <Typography variant="h5" gutterBottom sx={sectionTitleSx}>
               Overall Total for Basic and SEF Sharing
             </Typography>
             <TotalBox>
@@ -845,7 +966,7 @@ function Summary({ setMonth, setYear, onBack }) {
           </Box>
         </Grid>
       </Grid>
-    </div>
+    </Box>
   );
 }
 

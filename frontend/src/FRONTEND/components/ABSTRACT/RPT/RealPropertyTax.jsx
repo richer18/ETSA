@@ -36,13 +36,14 @@ import Typography from "@mui/material/Typography";
 import { format, parseISO } from "date-fns";
 import { saveAs } from "file-saver";
 import PropTypes from "prop-types";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BiSolidReport } from "react-icons/bi";
 import { IoMdAdd, IoMdDownload } from "react-icons/io";
 import { IoToday } from "react-icons/io5";
 import { MdSummarize } from "react-icons/md";
 import * as XLSX from "xlsx";
 import axios from "../../../../api/axiosInstance";
+import { useMaterialUIController } from "../../../../context";
 import RealPropertyTaxAbstract from "../../../../components/MD-Components/FillupForm/AbstractRPT";
 import {
   default as PopupDialog,
@@ -53,14 +54,16 @@ import GenerateReport from "./TableData/GenerateReport";
 import ReportTable from "./TableData/ReportTable";
 import SummaryTable from "./TableData/Summary";
 
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
+const StyledTableCell = styled(TableCell)(() => ({
   whiteSpace: "nowrap",
-  fontWeight: "bold",
+  fontWeight: 700,
   textAlign: "center",
-  background: "linear-gradient(135deg, #1976d2, #63a4ff)",
-  color: theme.palette.common.white,
-  borderBottom: `2px solid ${theme.palette.primary.dark}`,
-  fontSize: 14,
+  textTransform: "uppercase",
+  letterSpacing: "1px",
+  fontSize: 11.5,
+  background: "#f7f9fc",
+  color: "#0f2747",
+  borderBottom: "2px solid #d6a12b",
 }));
 
 const months = [
@@ -263,9 +266,15 @@ function Row({ row }) {
             aria-haspopup="true"
             onClick={handleMenuClick}
             variant="contained"
-            color="primary"
+            sx={{
+              textTransform: "none",
+              px: 2,
+              py: 0.75,
+              fontSize: "0.75rem",
+              borderRadius: 2,
+            }}
           >
-            ACTIONS
+            Actions
           </Button>
           <Menu
             id="simple-menu"
@@ -511,6 +520,32 @@ Row.propTypes = {
 };
 
 function RealPropertyTax() {
+  const [controller] = useMaterialUIController();
+  const { darkMode } = controller;
+  const uiColors = useMemo(
+    () => ({
+      navy: darkMode ? "#4f7bb5" : "#0f2747",
+      navyHover: darkMode ? "#3f6aa3" : "#0b1e38",
+      steel: darkMode ? "#7c8fa6" : "#4b5d73",
+      steelHover: darkMode ? "#6b7f97" : "#3c4c60",
+      teal: darkMode ? "#3aa08f" : "#0f6b62",
+      tealHover: darkMode ? "#2f8b7c" : "#0b544d",
+      amber: darkMode ? "#d19a3f" : "#a66700",
+      amberHover: darkMode ? "#b7832f" : "#8c5600",
+      red: darkMode ? "#d06666" : "#b23b3b",
+      redHover: darkMode ? "#b85656" : "#8f2f2f",
+      bg: darkMode ? "#0f1117" : "#f5f7fb",
+      cardGradients: [
+        "linear-gradient(135deg, #0f2747, #2f4f7f)",
+        "linear-gradient(135deg, #0f6b62, #2a8a7f)",
+        "linear-gradient(135deg, #4b5d73, #6a7f99)",
+        "linear-gradient(135deg, #a66700, #c98a2a)",
+        "linear-gradient(135deg, #1c2a3a, #2f4f7f)",
+        "linear-gradient(135deg, #2a3440, #4b5d73)",
+      ],
+    }),
+    [darkMode]
+  );
   const [total, setTotal] = useState(0);
   const [gfTotal, setGfTotal] = useState(0);
   const [sefTotal, setSEFTotal] = useState(0);
@@ -837,15 +872,16 @@ function RealPropertyTax() {
     <Box
       sx={{
         flexGrow: 1,
-        padding: 3,
+        padding: { xs: 2, md: 3 },
         minHeight: "100vh",
+        backgroundColor: uiColors.bg,
       }}
     >
       <Box sx={{ mb: 4 }}>
         {/* Search & Filters Row */}
-        <Box display="flex" alignItems="center" gap={3} sx={{ py: 2 }}>
+        <Box display="flex" alignItems="center" gap={2} sx={{ py: 2 }} flexWrap="wrap">
           {showFilters && (
-            <Box display="flex" alignItems="center" gap={2} flexGrow={1}>
+            <Box display="flex" alignItems="center" gap={2} flexGrow={1} flexWrap="wrap">
               <TextField
                 fullWidth
                 variant="outlined"
@@ -853,16 +889,41 @@ function RealPropertyTax() {
                 placeholder="Name or Receipt Number"
                 value={pendingSearchQuery}
                 onChange={(e) => setPendingSearchQuery(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon color="action" />
-                    </InputAdornment>
-                  ),
-                  sx: { borderRadius: "8px" },
+                sx={{
+                  minWidth: { xs: "100%", md: 280 },
+                  "& .MuiInputBase-input": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.divider,
+                  },
+                  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.secondary,
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) => theme.palette.text.primary,
+                  },
+                }}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon color="action" />
+                      </InputAdornment>
+                    ),
+                  },
+                  root: {
+                    sx: { borderRadius: "8px" },
+                  },
                 }}
               />
-              <Box display="flex" gap={2}>
+              <Box display="flex" gap={2} flexWrap="wrap">
                 <Autocomplete
                   disablePortal
                   options={months}
@@ -893,15 +954,20 @@ function RealPropertyTax() {
 
                 <Button
                   variant="contained"
-                  color="primary"
                   sx={{
                     px: 4,
                     height: "56px",
                     borderRadius: "8px",
                     boxShadow: "none",
-                    "&:hover": { boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.1)" },
+                    width: { xs: "100%", sm: "auto" },
+                    backgroundColor: uiColors.navy,
+                    "&:hover": {
+                      backgroundColor: uiColors.navyHover,
+                      boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.1)",
+                    },
                   }}
                   onClick={handleSearchClick}
+                  startIcon={<SearchIcon />}
                 >
                   Apply Filters
                 </Button>
@@ -913,7 +979,7 @@ function RealPropertyTax() {
         {/* Modern Action Buttons Row */}
         <Box display="flex" alignItems="center" gap={2} sx={{ py: 1 }}>
           {/* Primary Actions Group */}
-          <Box display="flex" gap={2} flexGrow={1}>
+          <Box display="flex" gap={2} flexGrow={1} flexWrap="wrap">
             {/* New Entry - Primary CTA */}
             <Tooltip title="Add New Entry" arrow>
               <Button
@@ -921,12 +987,12 @@ function RealPropertyTax() {
                 startIcon={<IoMdAdd size={18} />}
                 sx={{
                   px: 3.5,
-                  backgroundColor: "#1976d2",
+                  backgroundColor: uiColors.navy,
                   color: "white",
                   "&:hover": {
-                    backgroundColor: "#1565c0",
+                    backgroundColor: uiColors.navyHover,
                     transform: "translateY(-1px)",
-                    boxShadow: "0 3px 10px rgba(25, 118, 210, 0.3)",
+                    boxShadow: "0 3px 10px rgba(15, 39, 71, 0.3)",
                   },
                   textTransform: "none",
                   fontSize: 15,
@@ -935,7 +1001,7 @@ function RealPropertyTax() {
                   minWidth: "130px",
                   height: "44px",
                   transition: "all 0.2s ease",
-                  boxShadow: "0 2px 6px rgba(25, 118, 210, 0.2)",
+                  boxShadow: "0 2px 6px rgba(15, 39, 71, 0.2)",
                 }}
                 onClick={handleClickOpen}
               >
@@ -947,14 +1013,13 @@ function RealPropertyTax() {
             <Tooltip title="Generate Daily Report" arrow>
               <Button
                 variant="contained"
-                color="success"
                 startIcon={<IoToday size={16} />}
                 sx={{
                   px: 3.5,
-                  backgroundColor: "#2e7d32",
+                  backgroundColor: uiColors.teal,
                   color: "white",
                   "&:hover": {
-                    backgroundColor: "#1b5e20",
+                    backgroundColor: uiColors.tealHover,
                     transform: "translateY(-1px)",
                   },
                   textTransform: "none",
@@ -964,7 +1029,7 @@ function RealPropertyTax() {
                   minWidth: "130px",
                   height: "44px",
                   transition: "all 0.2s ease",
-                  boxShadow: "0 2px 6px rgba(46, 125, 50, 0.2)",
+                  boxShadow: "0 2px 6px rgba(15, 107, 98, 0.2)",
                 }}
                 onClick={toggleDailyTable}
               >
@@ -976,14 +1041,13 @@ function RealPropertyTax() {
             <Tooltip title="Generate Receipt Report" arrow>
               <Button
                 variant="contained"
-                color="secondary"
                 startIcon={<ReceiptIcon size={16} />}
                 sx={{
                   px: 3.5,
-                  backgroundColor: "#7b1fa2",
+                  backgroundColor: uiColors.steel,
                   color: "white",
                   "&:hover": {
-                    backgroundColor: "#6a1b9a",
+                    backgroundColor: uiColors.steelHover,
                     transform: "translateY(-1px)",
                   },
                   textTransform: "none",
@@ -993,7 +1057,7 @@ function RealPropertyTax() {
                   minWidth: "130px",
                   height: "44px",
                   transition: "all 0.2s ease",
-                  boxShadow: "0 2px 6px rgba(123, 31, 162, 0.2)",
+                  boxShadow: "0 2px 6px rgba(75, 93, 115, 0.2)",
                 }}
                 onClick={handleGenerateReport}
               >
@@ -1005,7 +1069,7 @@ function RealPropertyTax() {
           <Box
             display="flex"
             flexWrap="wrap"
-            gap={4}
+            gap={2}
             justifyContent="flex-start"
           >
             {/* Barangay Shares */}
@@ -1020,12 +1084,12 @@ function RealPropertyTax() {
                   fontWeight: 600,
                   borderRadius: 2,
                   textTransform: "none",
-                  backgroundColor: "success.main",
+                  backgroundColor: uiColors.teal,
                   color: "#fff",
                   boxShadow: 2,
                   transition: "all 0.2s ease",
                   "&:hover": {
-                    backgroundColor: "success.dark",
+                    backgroundColor: uiColors.tealHover,
                     transform: "translateY(-1px)",
                   },
                 }}
@@ -1047,12 +1111,12 @@ function RealPropertyTax() {
                   fontWeight: 600,
                   borderRadius: 2,
                   textTransform: "none",
-                  backgroundColor: "warning.main",
+                  backgroundColor: uiColors.steel,
                   color: "#fff",
                   boxShadow: 2,
                   transition: "all 0.2s ease",
                   "&:hover": {
-                    backgroundColor: "warning.dark",
+                    backgroundColor: uiColors.steelHover,
                     transform: "translateY(-1px)",
                   },
                 }}
@@ -1065,7 +1129,6 @@ function RealPropertyTax() {
             <Tooltip title="Financial Reports" arrow>
               <Button
                 variant="contained"
-                color="error"
                 startIcon={<BiSolidReport size={18} />}
                 onClick={toggleReportTable}
                 sx={{
@@ -1077,8 +1140,10 @@ function RealPropertyTax() {
                   borderRadius: 2,
                   boxShadow: 2,
                   transition: "all 0.2s ease",
+                  backgroundColor: uiColors.red,
+                  color: "white",
                   "&:hover": {
-                    backgroundColor: "error.dark",
+                    backgroundColor: uiColors.redHover,
                     transform: "translateY(-1px)",
                   },
                 }}
@@ -1091,7 +1156,6 @@ function RealPropertyTax() {
             <Tooltip title="Export Data" arrow>
               <Button
                 variant="contained"
-                color="info"
                 startIcon={<IoMdDownload size={18} />}
                 onClick={handleDownload}
                 sx={{
@@ -1104,8 +1168,9 @@ function RealPropertyTax() {
                   borderRadius: 2,
                   boxShadow: 2,
                   transition: "all 0.2s ease",
+                  backgroundColor: uiColors.amber,
                   "&:hover": {
-                    backgroundColor: "info.dark",
+                    backgroundColor: uiColors.amberHover,
                     transform: "translateY(-1px)",
                   },
                 }}
@@ -1131,34 +1196,30 @@ function RealPropertyTax() {
               value: total,
               text: "Total Revenue",
               icon: <AccountBalanceIcon fontSize="large" />,
-              gradient: "linear-gradient(135deg, #3f51b5, #5c6bc0)",
             },
             {
               value: shareTotal,
               text: "25% Share Income",
               icon: <PieChartIcon fontSize="large" />,
-              gradient: "linear-gradient(135deg, #4caf50, #66bb6a)",
             },
             {
               value: gfTotal,
               text: "General Fund",
               icon: <AccountTreeIcon fontSize="large" />,
-              gradient: "linear-gradient(135deg, #ff9800, #ffa726)",
             },
             {
               value: sefTotal,
               text: "SEF",
               icon: <SchoolIcon fontSize="large" />,
-              gradient: "linear-gradient(135deg, #e91e63, #ec407a)",
             },
-          ].map(({ value, text, icon, gradient }) => (
+          ].map(({ value, text, icon }, index) => (
             <Card
               key={text}
               sx={{
                 flex: 1,
                 p: 3,
                 borderRadius: "16px",
-                background: gradient,
+                background: uiColors.cardGradients[index % uiColors.cardGradients.length],
                 color: "white",
                 boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
                 transition: "all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)",
@@ -1283,7 +1344,8 @@ function RealPropertyTax() {
           component={Paper}
           sx={{
             borderRadius: 4,
-            boxShadow: 3,
+            boxShadow: 6,
+            overflow: "hidden",
             "& .MuiTableCell-root": {
               py: 2,
             },

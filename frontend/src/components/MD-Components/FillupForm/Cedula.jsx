@@ -11,6 +11,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import SaveIcon from "@mui/icons-material/Save";
 import dayjs from "dayjs";
 import PropTypes from "prop-types";
 import { useEffect, useMemo, useState } from "react";
@@ -26,22 +28,81 @@ const toNumber = (value) => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
+const formColors = {
+  navy: "#0f2747",
+  navyDeep: "#0b1e38",
+  steel: "#4b5d73",
+  teal: "#0f6b62",
+  amber: "#a66700",
+  bg: "#f5f7fb",
+  card: "#ffffff",
+  border: "#d8e2ee",
+};
+
 const stepCircleSx = {
-  width: 32,
-  height: 32,
-  borderRadius: "50%",
+  height: 28,
+  px: 1.5,
+  borderRadius: "999px",
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
-  backgroundColor: "#0080A7",
+  backgroundColor: formColors.navy,
   color: "#fff",
+  fontSize: "0.75rem",
   fontWeight: 700,
-  mr: 1.5,
+  letterSpacing: "0.6px",
 };
 
 const roundedFieldSx = {
-  "& .MuiOutlinedInput-root": { borderRadius: "12px" },
+  "& .MuiOutlinedInput-root": {
+    borderRadius: "10px",
+    backgroundColor: "#fbfcfe",
+  },
+  "& .MuiOutlinedInput-notchedOutline": {
+    borderColor: formColors.steel,
+  },
+  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+    borderColor: formColors.navy,
+  },
+  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+    borderColor: formColors.amber,
+  },
 };
+
+const sectionPaperSx = {
+  p: { xs: 2, md: 2.5 },
+  borderRadius: "14px",
+  backgroundColor: formColors.card,
+  border: `1px solid ${formColors.border}`,
+};
+
+const sectionHeaderSx = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  mb: 2,
+  px: 1.5,
+  py: 1,
+  borderRadius: "10px",
+  border: `1px solid ${formColors.amber}`,
+  background: `linear-gradient(180deg, ${formColors.navy} 0%, ${formColors.navyDeep} 100%)`,
+  color: "#ffffff",
+};
+
+const sectionTitleSx = {
+  fontWeight: 800,
+  letterSpacing: "0.3px",
+  color: "#ffffff",
+};
+
+const certificateShellSx = {
+  p: { xs: 2, md: 3 },
+  borderRadius: "18px",
+  background: `linear-gradient(180deg, ${formColors.bg} 0%, #eef2f7 100%)`,
+  border: `1px solid ${formColors.border}`,
+};
+
+const sectionNoteSx = { color: "#dbe5f2", fontSize: "0.8rem" };
 
 function Cedula({ data, mode, onSaved, onClose }) {
   const [selectedDate, setSelectedDate] = useState("");
@@ -167,25 +228,32 @@ function Cedula({ data, mode, onSaved, onClose }) {
 
   return (
     <Box sx={{ maxWidth: 1220, mx: "auto", p: { xs: 1, md: 2 } }}>
-      <Row className="g-3">
-        <Col xs={12} lg={8}>
+      <Box sx={certificateShellSx}>
+      <Row className="g-0" style={{ marginTop: 0 }}>
+        <Col xs={12}>
           <Paper
             elevation={0}
-            sx={{
-              p: { xs: 2, md: 2.5 },
-              borderRadius: "16px",
-              border: "1px solid #d8e2ee",
-              backgroundColor: "#f8fbff",
-              mb: 2,
-            }}
+            sx={{ ...sectionPaperSx, mb: 2 }}
           >
-            <Box display="flex" alignItems="center" mb={2}>
-              <Box sx={stepCircleSx}>1</Box>
-              <Typography variant="h6" fontWeight={700} color="#16324f">
-                Cedula Information
+            <Box sx={sectionHeaderSx}>
+              <Box display="flex" alignItems="center" gap={1.5}>
+                <Box sx={stepCircleSx}>SECTION 1</Box>
+                <Typography variant="h6" sx={sectionTitleSx}>
+                  Cedula Information
+                </Typography>
+              </Box>
+              <Typography variant="caption" sx={sectionNoteSx}>
+                Applicant identity and certificate reference
               </Typography>
             </Box>
-            <Row className="g-2">
+
+            <Row  className="g-2 align-items-center"
+              style={{
+                border: `1px solid ${formColors.amber}`,
+                backgroundColor: "rgba(166, 103, 0, 0.08)",
+                borderRadius: "12px",
+                padding: "12px",
+              }}>
               <Col xs={12} md={6}>
                 <TextField
                   fullWidth
@@ -215,7 +283,7 @@ function Cedula({ data, mode, onSaved, onClose }) {
                   label="Local TIN"
                   name="localTin"
                   value={formData.localTin}
-                  onChange={handleChange}
+                  InputProps={{ readOnly: true }}
                   variant="outlined"
                   sx={roundedFieldSx}
                 />
@@ -255,28 +323,37 @@ function Cedula({ data, mode, onSaved, onClose }) {
 
           <Paper
             elevation={0}
-            sx={{
-              p: { xs: 2, md: 2.5 },
-              borderRadius: "16px",
-              border: "1px solid #d8e2ee",
-              backgroundColor: "#ffffff",
-            }}
+            sx={sectionPaperSx}
           >
-            <Box display="flex" alignItems="center" mb={2}>
-              <Box sx={stepCircleSx}>2</Box>
-              <Typography variant="h6" fontWeight={700} color="#16324f">
-                Tax Breakdown
+            <Box sx={sectionHeaderSx}>
+              <Box display="flex" alignItems="center" gap={1.5}>
+                <Box sx={stepCircleSx}>SECTION 2</Box>
+                <Typography variant="h6" sx={sectionTitleSx}>
+                  Tax Breakdown
+                </Typography>
+              </Box>
+              <Typography variant="caption" sx={sectionNoteSx}>
+                Assessment of community tax dues
               </Typography>
             </Box>
 
-            <Row className="g-2 align-items-center">
+            <Row
+              className="g-2 align-items-center"
+              style={{
+                border: `1px solid ${formColors.amber}`,
+                backgroundColor: "rgba(166, 103, 0, 0.08)",
+                borderRadius: "12px",
+                padding: "12px",
+              }}
+            >
               <Col xs={12} md={8}>
-                <Typography sx={{ color: "#2b3c54", fontWeight: 600 }}>
+                <Typography sx={{ fontWeight: 600, color: formColors.navy }}>
                   Basic Community Tax
                 </Typography>
               </Col>
               <Col xs={12} md={4}>
                 <TextField
+                isEditMode ="false"
                   fullWidth
                   value={basicCommunityTax.toFixed(2)}
                   InputProps={{ readOnly: true, startAdornment: <InputAdornment position="start">PHP</InputAdornment> }}
@@ -285,7 +362,7 @@ function Cedula({ data, mode, onSaved, onClose }) {
               </Col>
 
               <Col xs={12} md={8}>
-                <Typography sx={{ color: "#2b3c54", fontWeight: 600 }}>
+                <Typography sx={{ fontWeight: 600, color: formColors.navy }}>
                   Business Gross Receipts
                 </Typography>
               </Col>
@@ -302,7 +379,7 @@ function Cedula({ data, mode, onSaved, onClose }) {
               </Col>
 
               <Col xs={12} md={8}>
-                <Typography sx={{ color: "#2b3c54", fontWeight: 600 }}>
+                <Typography sx={{ fontWeight: 600, color: formColors.navy }}>
                   Salaries / Profession Earnings
                 </Typography>
               </Col>
@@ -319,7 +396,7 @@ function Cedula({ data, mode, onSaved, onClose }) {
               </Col>
 
               <Col xs={12} md={8}>
-                <Typography sx={{ color: "#2b3c54", fontWeight: 600 }}>
+                <Typography sx={{ fontWeight: 600, color: formColors.navy }}>
                   Real Property Income
                 </Typography>
               </Col>
@@ -336,7 +413,7 @@ function Cedula({ data, mode, onSaved, onClose }) {
               </Col>
 
               <Col xs={12} md={8}>
-                <Typography sx={{ color: "#2b3c54", fontWeight: 600 }}>
+                <Typography sx={{ fontWeight: 600, color: formColors.navy }}>
                   Interest
                 </Typography>
               </Col>
@@ -346,18 +423,20 @@ function Cedula({ data, mode, onSaved, onClose }) {
                   type="number"
                   name="interest"
                   value={formData.interest}
-                  onChange={handleChange}
-                  InputProps={{ startAdornment: <InputAdornment position="start">PHP</InputAdornment> }}
+                  InputProps={{
+                    readOnly: true,
+                    startAdornment: <InputAdornment position="start">PHP</InputAdornment>,
+                  }}
                   sx={roundedFieldSx}
                 />
               </Col>
 
               <Col xs={12}>
-                <Divider sx={{ my: 1 }} />
+                <Divider sx={{ my: 1, borderColor: formColors.border }} />
               </Col>
 
               <Col xs={12} md={8}>
-                <Typography sx={{ color: "#0c2e4d", fontWeight: 800 }}>
+                <Typography sx={{ fontWeight: 800, color: formColors.navy }}>
                   Total Amount Paid
                 </Typography>
               </Col>
@@ -371,7 +450,7 @@ function Cedula({ data, mode, onSaved, onClose }) {
               </Col>
 
               <Col xs={12} md={8}>
-                <Typography sx={{ color: "#2b3c54", fontWeight: 600 }}>
+                <Typography sx={{ fontWeight: 600, color: formColors.navy }}>
                   Cashier
                 </Typography>
               </Col>
@@ -399,9 +478,30 @@ function Cedula({ data, mode, onSaved, onClose }) {
               </Col>
             </Row>
 
-            <Row className="g-2 mt-2">
+            <Row className="g-2 m-2 align-items-center"
+              style={{
+                border: `1px solid ${formColors.amber}`,
+                backgroundColor: "rgba(166, 103, 0, 0.08)",
+                borderRadius: "12px",
+                padding: "12px",
+              }}>
               <Col xs={12} sm={6}>
-                <Button fullWidth variant="outlined" onClick={handleReset}>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  onClick={handleReset}
+                  startIcon={<RestartAltIcon />}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 700,
+                    borderColor: formColors.navy,
+                    color: formColors.navy,
+                    "&:hover": {
+                      borderColor: formColors.navy,
+                      backgroundColor: "rgba(15, 39, 71, 0.08)",
+                    },
+                  }}
+                >
                   RESET
                 </Button>
               </Col>
@@ -411,7 +511,15 @@ function Cedula({ data, mode, onSaved, onClose }) {
                   variant="contained"
                   onClick={handleSave}
                   disabled={savingInProgress}
-                  sx={{ fontWeight: 700 }}
+                  startIcon={<SaveIcon />}
+                  sx={{
+                    fontWeight: 700,
+                    textTransform: "none",
+                    backgroundColor: formColors.navy,
+                    "&:hover": {
+                      backgroundColor: formColors.navyDeep,
+                    },
+                  }}
                 >
                   {savingInProgress ? "SAVING..." : "SAVE"}
                 </Button>
@@ -420,86 +528,9 @@ function Cedula({ data, mode, onSaved, onClose }) {
           </Paper>
         </Col>
 
-        <Col xs={12} lg={4}>
-          <Paper
-            elevation={0}
-            sx={{
-              p: 2.5,
-              borderRadius: "16px",
-              border: "1px solid #d8e2ee",
-              background: "linear-gradient(160deg, #f5f9ff 0%, #edf5ff 100%)",
-            }}
-          >
-            <Typography variant="overline" sx={{ letterSpacing: 1.6, color: "#50647c" }}>
-              Quick Summary
-            </Typography>
-            <Typography variant="h5" fontWeight={800} color="#0d2e4f" sx={{ mb: 0.5 }}>
-              PHP {calculateTotal()}
-            </Typography>
-            <Typography variant="body2" color="#5b7088" sx={{ mb: 2 }}>
-              Current total assessment
-            </Typography>
-
-            <Divider sx={{ mb: 2 }} />
-
-            <Row className="g-2">
-              <Col xs={7}>
-                <Typography variant="body2" color="#4c6078">Basic</Typography>
-              </Col>
-              <Col xs={5}>
-                <Typography variant="body2" textAlign="right" fontWeight={600}>
-                  PHP {basicCommunityTax.toFixed(2)}
-                </Typography>
-              </Col>
-
-              <Col xs={7}>
-                <Typography variant="body2" color="#4c6078">Business</Typography>
-              </Col>
-              <Col xs={5}>
-                <Typography variant="body2" textAlign="right" fontWeight={600}>
-                  PHP {totals.business.toFixed(2)}
-                </Typography>
-              </Col>
-
-              <Col xs={7}>
-                <Typography variant="body2" color="#4c6078">Salaries</Typography>
-              </Col>
-              <Col xs={5}>
-                <Typography variant="body2" textAlign="right" fontWeight={600}>
-                  PHP {totals.salaries.toFixed(2)}
-                </Typography>
-              </Col>
-
-              <Col xs={7}>
-                <Typography variant="body2" color="#4c6078">Real Property</Typography>
-              </Col>
-              <Col xs={5}>
-                <Typography variant="body2" textAlign="right" fontWeight={600}>
-                  PHP {totals.realProperty.toFixed(2)}
-                </Typography>
-              </Col>
-
-              <Col xs={7}>
-                <Typography variant="body2" color="#4c6078">Interest</Typography>
-              </Col>
-              <Col xs={5}>
-                <Typography variant="body2" textAlign="right" fontWeight={600}>
-                  PHP {totals.interest.toFixed(2)}
-                </Typography>
-              </Col>
-            </Row>
-
-            <Button
-              fullWidth
-              variant="text"
-              onClick={onClose}
-              sx={{ mt: 2, textTransform: "none" }}
-            >
-              Close Form
-            </Button>
-          </Paper>
-        </Col>
+        <Col xs={12} />
       </Row>
+      </Box>
     </Box>
   );
 }
